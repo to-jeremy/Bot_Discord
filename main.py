@@ -46,33 +46,18 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send(f"Commande non valide. Utilisez `{ctx.prefix}afficher_commandes` pour voir les commandes disponibles.")
 
+
 annonces = {}  # Dictionnaire pour stocker les annonces avec leur ID comme clé
 annonce_id_counter = 1
 
 @bot.command(name='ajouter_annonce')
-async def annonce(ctx, canal: str = None, *, message: str = None):
+async def ajouter_annonce(ctx, canal: str = None, *, message: str = None):
     global annonce_id_counter
     if isinstance(ctx.author, discord.Member):
         if "Admin" in [role.name for role in ctx.author.roles]:
-            if canal is None and message is None:
+            # Vérifier si le nom ou l'ID du canal est spécifié
+            if canal is None:
                 await ctx.send("Veuillez spécifier le nom ou l'ID du canal et le message que vous souhaitez annoncer.")
-                return
-            elif canal is not None and message is None:
-                found_channel = None
-                # Vérifiez si le canal est un numéro d'identifiant
-                if canal.isdigit():
-                    found_channel = ctx.guild.get_channel(int(canal))
-                else:
-                    # Recherchez le canal par nom
-                    for channel in ctx.guild.text_channels:
-                        if canal.lower() in channel.name.lower():
-                            found_channel = channel
-                            break
-
-                if found_channel is not None:
-                    await ctx.send("Veuillez spécifier le message que vous souhaitez annoncer.")
-                else:
-                    await ctx.send(f'Aucun canal "{canal}" n\'a été trouvé sur le serveur.')
                 return
 
             found_channel = None
@@ -82,24 +67,95 @@ async def annonce(ctx, canal: str = None, *, message: str = None):
             else:
                 # Recherchez le canal par nom
                 for channel in ctx.guild.text_channels:
-                    if canal is not None and canal.lower() in channel.name.lower():
+                    if canal.lower() in channel.name.lower():
                         found_channel = channel
                         break
 
-            if found_channel is not None:
-                annonce_id = annonce_id_counter
-                annonce_id_counter += 1
+            # Vérifier si le canal existe
+            if found_channel is None:
+                await ctx.send(f'Aucun canal "{canal}" n\'a été trouvé sur le serveur.')
+                return
 
-                # Stockez l'annonce dans le dictionnaire
-                annonces[annonce_id] = {"channel": found_channel, "message": message}
+            # Vérifier si le message est spécifié
+            if message is None:
+                await ctx.send("Veuillez spécifier le message que vous souhaitez annoncer.")
+                return
 
-                await found_channel.send(f"{message}")
-                print(f'Annonce n°{annonce_id} envoyée avec succès sur le canal #{found_channel.name} !')
-            else:
-                if canal is not None:
-                    await ctx.send(f'Aucun canal "{canal}" trouvé sur le serveur.')
+            annonce_id = annonce_id_counter
+            annonce_id_counter += 1
+
+            # Stockez l'annonce dans le dictionnaire
+            annonces[annonce_id] = {
+                "channel_id": found_channel.id,
+                "message": message,
+                "message_preview": message[:50]
+            }
+
+            # Envoyer le message dans le canal spécifié
+            sent_message = await found_channel.send(f"{message}")
+            annonces[annonce_id]["message_id"] = sent_message.id  # Enregistrez l'ID du message
+
+            await ctx.send(f'L\'annonce n°{annonce_id} ajoutée avec succès sur le canal #{found_channel.name} !')
+        else:
+            await ctx.send('Vous n\'avez pas les permissions nécessaires.')
+    else:
+        await ctx.send('Cette commande doit être exécutée sur un serveur, pas en message privé.')
+
+@bot.command(name='modifier_annonce')
+async def modifier_annonce(ctx, annonce_id: int = None, *, new_message: str = None, new_channel: str = None):
+    if isinstance(ctx.author, discord.Member):
+        if "Admin" in [role.name for role in ctx.author.roles]:
+            # Vérifier si l'ID de l'annonce est spécifié
+            if annonce_id is None:
+                await ctx.send("Veuillez spécifier l'ID de l'annonce que vous souhaitez modifier.")
+                return
+
+            if annonce_id not in annonces:
+                await ctx.send(f'Aucune annonce avec l\'ID {annonce_id} n\'a été trouvée.')
+                return
+
+            annonce = annonces[annonce_id]
+
+            # Vérifier si le message est modifié
+            if new_message is not None:
+                annonce["message"] = new_message
+                annonce["message_preview"] = new_message[:50]
+
+            # Vérifier si le canal est modifié
+            if new_channel is not None:
+                found_channel = None
+                # Vérifier si le canal est un numéro d'identifiant
+                if new_channel.isdigit():
+                    found_channel = ctx.guild.get_channel(int(new_channel))
                 else:
-                    await ctx.send("Veuillez spécifier le nom ou l'ID du canal sur lequel vous souhaitez envoyer l'annonce.")
+                    # Recherchez le canal par nom
+                    for channel in ctx.guild.text_channels:
+                        if new_channel.lower() in channel.name.lower():
+                            found_channel = channel
+                            break
+
+                    # Vérifier si le canal existe
+                    if found_channel is None:
+                        await ctx.send(f'Aucun canal "{new_channel}" n\'a été trouvé sur le serveur.')
+                        return
+
+                annonce["channel_id"] = found_channel.id
+
+            # Vérifier si au moins l'un des paramètres est spécifié
+            if new_message is None and new_channel is None:
+                await ctx.send("Veuillez spécifier au moins l'un des paramètres à modifier : `nouveau_message` ou `nouveau_canal`.")
+                return
+
+            # Mettre à jour le message dans le canal existant
+            try:
+                sent_message = await bot.get_channel(annonce["channel_id"]).fetch_message(annonce["message_id"])
+                if sent_message:
+                    await sent_message.edit(content=f"{new_message}")
+                    await ctx.send(f'L\'annonce n° {annonce_id} modifiée avec succès.')
+                else:
+                    await ctx.send(f'Impossible de trouver le message d\'annonce avec l\'ID {annonce["message_id"]}.')
+            except discord.NotFound:
+                await ctx.send(f'Impossible de trouver le message d\'annonce avec l\'ID {annonce["message_id"]}.')
         else:
             await ctx.send('Vous n\'avez pas les permissions nécessaires.')
     else:
@@ -113,9 +169,10 @@ async def afficher_annonces(ctx):
         if annonces:
             annonces_info = []
             for annonce_id, annonce_data in annonces.items():
-                channel_name = annonce_data["channel"].name
-                message_preview = annonce_data["message"][:50]  # Afficher les 50 premiers caractères du message
-                annonces_info.append(f"N° ID : {annonce_id} | Salon : {channel_name} | Message : {message_preview}")
+                channel_name = bot.get_channel(annonce_data["channel_id"]).name
+                message_id = annonce_data["message_id"]
+                message_preview = annonce_data["message_preview"]  # Afficher les 50 premiers caractères du message
+                annonces_info.append(f"N° de l'annonce : {annonce_id} | Salon : {channel_name} | Message : {message_preview}")
 
             annonces_str = '\n'.join(annonces_info)
             await ctx.send(f'Liste des annonces :\n-------------------- \n{annonces_str}')
