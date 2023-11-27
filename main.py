@@ -94,7 +94,7 @@ async def annonce(ctx, canal: str = None, *, message: str = None):
                 annonces[annonce_id] = {"channel": found_channel, "message": message}
 
                 await found_channel.send(f"{message}")
-                print(f'Annonce #{annonce_id} envoyée avec succès sur le canal #{found_channel.name} !')
+                print(f'Annonce n°{annonce_id} envoyée avec succès sur le canal #{found_channel.name} !')
             else:
                 if canal is not None:
                     await ctx.send(f'Aucun canal "{canal}" trouvé sur le serveur.')
@@ -104,6 +104,25 @@ async def annonce(ctx, canal: str = None, *, message: str = None):
             await ctx.send('Vous n\'avez pas les permissions nécessaires.')
     else:
         await ctx.send('Cette commande doit être exécutée sur un serveur, pas en message privé.')
+
+
+@bot.command(name='afficher_annonces')
+async def afficher_annonces(ctx):
+    # Vérifier si l'utilisateur a le rôle d'administrateur
+    if "Admin" in [role.name for role in ctx.author.roles]:
+        if annonces:
+            annonces_info = []
+            for annonce_id, annonce_data in annonces.items():
+                channel_name = annonce_data["channel"].name
+                message_preview = annonce_data["message"][:50]  # Afficher les 50 premiers caractères du message
+                annonces_info.append(f"N° ID : {annonce_id} | Salon : {channel_name} | Message : {message_preview}")
+
+            annonces_str = '\n'.join(annonces_info)
+            await ctx.send(f'Liste des annonces :\n-------------------- \n{annonces_str}')
+        else:
+            await ctx.send('Aucune annonce n\'a été ajoutée.')
+    else:
+        await ctx.send('Vous n\'avez pas les permissions nécessaires.')
 
 
 tickets_ouverts = {}
@@ -143,7 +162,7 @@ async def ouvrir_ticket(ctx, *, sujet=None):
     # Envoyer un message d'accueil dans le canal du ticket
     try:
         await ticket_channel.send(f"Bienvenue dans votre ticket ! Sujet : {sujet}")
-        print("Ticket ouvert - Sujet :", sujet, "- Numéro du canal :", ticket_channel.id)
+        print("Ticket ouvert - Sujet :", sujet, "- N° du canal :", ticket_channel.id)
     except discord.Forbidden:
         print("Le bot n'a pas les autorisations nécessaires pour envoyer des messages dans le canal.")
         await ctx.send("Le bot n'a pas les autorisations nécessaires pour envoyer des messages dans le canal de ticket.")
@@ -169,7 +188,7 @@ async def fermer_ticket(ctx, ticket_id: int = None):
 async def fermer_ticket_specifique(ctx, ticket_id: int):
     # Vérifie si le ticket_id existe dans le dictionnaire
     if ticket_id not in {v[0] for v in tickets_ouverts.values()}:
-        await ctx.send(f"Ticket avec l'ID {ticket_id} non trouvé.")
+        await ctx.send(f"Ticket avec l'ID n°{ticket_id} non trouvé.")
         return
 
     # Trouver l'utilisateur associé à ce ticket_id
@@ -192,7 +211,7 @@ async def fermer_ticket_specifique(ctx, ticket_id: int):
         del tickets_ouverts[user_id]
 
     # Informer l'administrateur que le ticket a été fermé avec le nom du sujet
-    await ctx.send(f"Le ticket avec l'ID {ticket_id} (Sujet: {sujet_ticket}) a été fermé avec succès.")
+    await ctx.send(f"Le ticket avec l'ID n°{ticket_id} (Sujet : {sujet_ticket}) a été fermé avec succès.")
 
 
 @bot.command(name='tickets')
