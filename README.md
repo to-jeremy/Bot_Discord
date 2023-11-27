@@ -5,7 +5,7 @@ Version 1 (27/11/23) :
 - Systèmes d'annonces :<br>
     *Créations d'annonces dans un canal spécifique du serveur<br>
     *Modifications des annonces publiées<br>
-    *Suppressions des annonces publiées<br>
+    *Suppressions des annonces publiées (pas encore fait)<br>
     *Listes des annonces publiées<br>
 
 - Système de tickets :<br>
