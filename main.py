@@ -15,12 +15,12 @@ class Commande_Aide(HelpCommand):
         return f"{self.context.prefix}{command.qualified_name} {command.signature}"
 
     async def send_bot_help(self, mapping):
-        embed = discord.Embed(title="Commandes du Bot", color=0x00ff00)
+        embed = discord.Embed(title="Manuel du Bot", color=0x00ff00)
 
         for cog, commands in mapping.items():
             command_signatures = [self.get_command_signature(c) for c in sorted(commands, key=lambda x: x.name)]
             if command_signatures:
-                cog_name = getattr(cog, "qualified_name", "Autre")
+                cog_name = getattr(cog, "qualified_name", "Commandes")
                 embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
 
         channel = self.get_destination()
