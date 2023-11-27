@@ -102,7 +102,7 @@ async def ajouter_annonce(ctx, canal: str = None, *, message: str = None):
         await ctx.send('Cette commande doit être exécutée sur un serveur, pas en message privé.')
 
 @bot.command(name='modifier_annonce')
-async def modifier_annonce(ctx, annonce_id: int = None, *, new_message: str = None, new_channel: str = None):
+async def modifier_annonce(ctx, annonce_id: int = None, new_message: str = None):
     if isinstance(ctx.author, discord.Member):
         if "Admin" in [role.name for role in ctx.author.roles]:
             # Vérifier si l'ID de l'annonce est spécifié
@@ -121,29 +121,9 @@ async def modifier_annonce(ctx, annonce_id: int = None, *, new_message: str = No
                 annonce["message"] = new_message
                 annonce["message_preview"] = new_message[:50]
 
-            # Vérifier si le canal est modifié
-            if new_channel is not None:
-                found_channel = None
-                # Vérifier si le canal est un numéro d'identifiant
-                if new_channel.isdigit():
-                    found_channel = ctx.guild.get_channel(int(new_channel))
-                else:
-                    # Recherchez le canal par nom
-                    for channel in ctx.guild.text_channels:
-                        if new_channel.lower() in channel.name.lower():
-                            found_channel = channel
-                            break
-
-                    # Vérifier si le canal existe
-                    if found_channel is None:
-                        await ctx.send(f'Aucun canal "{new_channel}" n\'a été trouvé sur le serveur.')
-                        return
-
-                annonce["channel_id"] = found_channel.id
-
-            # Vérifier si au moins l'un des paramètres est spécifié
-            if new_message is None and new_channel is None:
-                await ctx.send("Veuillez spécifier au moins l'un des paramètres à modifier : `nouveau_message` ou `nouveau_canal`.")
+            # Vérifier si le nouveau message est spécifié
+            if new_message is None:
+                await ctx.send("Veuillez spécifier le nouveau message que vous souhaitez définir.")
                 return
 
             # Mettre à jour le message dans le canal existant
@@ -160,7 +140,6 @@ async def modifier_annonce(ctx, annonce_id: int = None, *, new_message: str = No
             await ctx.send('Vous n\'avez pas les permissions nécessaires.')
     else:
         await ctx.send('Cette commande doit être exécutée sur un serveur, pas en message privé.')
-
 
 @bot.command(name='afficher_annonces')
 async def afficher_annonces(ctx):
