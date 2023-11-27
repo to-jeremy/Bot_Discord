@@ -44,21 +44,28 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send(f"Commande non valide. Utilisez `{ctx.prefix}afficher_commandes` pour voir les commandes disponibles.")
 
+annonces = {}  # Dictionnaire pour stocker les annonces avec leur ID comme clé
+annonce_id_counter = 1
 
-@bot.command(name='annonce')
+@bot.command(name='ajouter_annonce')
 async def annonce(ctx, canal: str = None, *, message: str = None):
-    # Assurez-vous que le contexte est un objet Member
+    global annonce_id_counter
     if isinstance(ctx.author, discord.Member):
         if "Admin" in [role.name for role in ctx.author.roles]:
             if canal is None and message is None:
-                await ctx.send("Veuillez spécifier le nom du canal et le message que vous souhaitez annoncer.")
+                await ctx.send("Veuillez spécifier le nom ou l'ID du canal et le message que vous souhaitez annoncer.")
                 return
             elif canal is not None and message is None:
                 found_channel = None
-                for channel in ctx.guild.text_channels:
-                    if canal.lower() in channel.name.lower():
-                        found_channel = channel
-                        break
+                # Vérifiez si le canal est un numéro d'identifiant
+                if canal.isdigit():
+                    found_channel = ctx.guild.get_channel(int(canal))
+                else:
+                    # Recherchez le canal par nom
+                    for channel in ctx.guild.text_channels:
+                        if canal.lower() in channel.name.lower():
+                            found_channel = channel
+                            break
 
                 if found_channel is not None:
                     await ctx.send("Veuillez spécifier le message que vous souhaitez annoncer.")
@@ -67,19 +74,30 @@ async def annonce(ctx, canal: str = None, *, message: str = None):
                 return
 
             found_channel = None
-            for channel in ctx.guild.text_channels:
-                if canal is not None and canal.lower() in channel.name.lower():
-                    found_channel = channel
-                    break
+            # Vérifiez si le canal est un numéro d'identifiant
+            if canal.isdigit():
+                found_channel = ctx.guild.get_channel(int(canal))
+            else:
+                # Recherchez le canal par nom
+                for channel in ctx.guild.text_channels:
+                    if canal is not None and canal.lower() in channel.name.lower():
+                        found_channel = channel
+                        break
 
             if found_channel is not None:
-                await found_channel.send(message)
-                print(f'Annonce envoyée avec succès sur le canal #{found_channel.name} !')
+                annonce_id = annonce_id_counter
+                annonce_id_counter += 1
+
+                # Stockez l'annonce dans le dictionnaire
+                annonces[annonce_id] = {"channel": found_channel, "message": message}
+
+                await found_channel.send(f"{message}")
+                print(f'Annonce #{annonce_id} envoyée avec succès sur le canal #{found_channel.name} !')
             else:
                 if canal is not None:
                     await ctx.send(f'Aucun canal "{canal}" trouvé sur le serveur.')
                 else:
-                    await ctx.send("Veuillez spécifier le nom du canal sur lequel vous souhaitez envoyer l'annonce.")
+                    await ctx.send("Veuillez spécifier le nom ou l'ID du canal sur lequel vous souhaitez envoyer l'annonce.")
         else:
             await ctx.send('Vous n\'avez pas les permissions nécessaires.')
     else:
