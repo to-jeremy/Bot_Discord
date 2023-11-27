@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 from discord.ext.commands import HelpCommand
-from discord.ui import Button, View
 
 intents = discord.Intents.default()
 intents.messages = True
