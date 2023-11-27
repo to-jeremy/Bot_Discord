@@ -2,7 +2,7 @@
 Entrainement à la création d'un bot discord en Python
 
 Version 1 (27/11/23) :
-- Création annonces dans un canal spécifique
+- Création d'annonces dans un canal spécifique du serveur
 
 - Système de tickets :<br>
     *Ouvertures de tickets<br>
