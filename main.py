@@ -58,7 +58,7 @@ async def presentation(ctx):
 
     embed.add_field(
         name="Fonctionnalités principales",
-        value="1. Annonces\n2. Tickets\n",
+        value="1. Annonces\n2. Tickets\n3. Manuel de commandes",
         inline=False
     )
 
