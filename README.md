@@ -29,4 +29,4 @@ Entrainement à la création d'un bot discord en Python
 
 - Présentation du bot (pas encore fait)
 
-- Idée : Faire un historique des actions du bot (Logs)
+- Idée : Faire un historique (logs) des actions du bot (pas encore fait)
