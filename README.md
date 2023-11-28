@@ -27,6 +27,6 @@ Entrainement à la création d'un bot discord en Python
 - Systèmes d'annonces :<br>
     --> Suppressions des annonces publiées<br>
 
-- Présentation du bot
+- Présentation du bot et nouveautés/mises à jour
 
-- Idée : Faire un historique (logs) des actions du bot (pas encore fait)
+- Historique des actions du bot (en cours de développement)

@@ -370,19 +370,19 @@ async def get_logs(ctx):
     else:
         await ctx.send('Vous n\'avez pas les permissions nécessaires.')
 
-# Exemple de log
-@bot.command(name='ma_commande')
-async def ma_commande(ctx):
-    # Vérifier si l'utilisateur a la permission d'exécuter cette commande
-    if not ctx.author.guild_permissions.administrator:
-        await ctx.send("Vous n'avez pas la permission d'accéder aux logs.")
-        return
+# # Exemple de log
+# @bot.command(name='ma_commande')
+# async def ma_commande(ctx):
+#     # Vérifier si l'utilisateur a la permission d'exécuter cette commande
+#     if not ctx.author.guild_permissions.administrator:
+#         await ctx.send("Vous n'avez pas la permission d'accéder aux logs.")
+#         return
     
-    # Exemple de log
-    logging.info(f"L'utilisateur {ctx.author} a exécuté la commande !ma_commande.")
+#     # Exemple de log
+#     logging.info(f"L'utilisateur {ctx.author} a exécuté la commande !ma_commande.")
     
-    # Envoyer le log au canal Discord spécifié
-    #await send_logs_to_channel(f"L'utilisateur {ctx.author} a exécuté la commande !ma_commande.")
+#     # Envoyer le log au canal Discord spécifié
+#     #await send_logs_to_channel(f"L'utilisateur {ctx.author} a exécuté la commande !ma_commande.")
 
 
 bot.run('MTE3ODM4NTExMTY2NjkzMzg5MQ.GCBXvS.c_onrPj3Ll9yhAauSJEN4TGY3QjDi5-gFtpc6g')
