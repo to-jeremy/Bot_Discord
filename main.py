@@ -47,6 +47,31 @@ async def on_command_error(ctx, error):
         await ctx.send(f"Commande non valide. Utilisez `{ctx.prefix}afficher_commandes` pour voir les commandes disponibles.")
 
 
+@bot.command(name='presentation')
+async def presentation(ctx):
+    embed = discord.Embed(
+        title="Présentation du Bot",
+        description="Je suis un bot Discord en cours de développement donc je suis hébergé localement par mon créateur ! Pour le moment, je suis en phase des tests.",
+        color=0x3498db  # Couleur bleue
+    )
+
+    embed.add_field(
+        name="Fonctionnalités principales",
+        value="1. Annonces\n2. Tickets\n",
+        inline=False
+    )
+
+    embed.add_field(
+        name="Commandes",
+        value="Utilisez `!help` ou `!afficher_commandes` pour afficher la liste des commandes disponibles.",
+        inline=False
+    )
+
+    embed.set_footer(text="*Le Serviteur*")
+
+    await ctx.send(embed=embed)
+
+
 annonces = {}  # Dictionnaire pour stocker les annonces avec leur ID comme clé
 annonce_id_counter = 1
 
