@@ -1,0 +1,18 @@
+INFO:discord.client:logging in using static token
+INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: 058242bbfbaeb043f2368caf9f4c24ee).
+INFO:discord.client:logging in using static token
+INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: 69bfd834f5794d4fa4a0e1caceda98ab).
+INFO:root:Action réussie : Commande exécutée avec succès.
+INFO:discord.client:logging in using static token
+INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: 8bd77a4f05a35498f60d0dca17cd0837).
+INFO:discord.client:logging in using static token
+INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: 71e38f5c7cb531e6b71aaf46e296eef3).
+INFO:discord.client:logging in using static token
+INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: e41bdee9fdc4b6f11a9ab1791b636320).
+INFO:discord.client:logging in using static token
+INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: 6503fcad2b3778255e75799dd0d99266).
+INFO:root:L'utilisateur darkofu a exécuté la commande !ma_commande.
+INFO:discord.client:logging in using static token
+INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: b398a284a754862c0aa1c7ac8cd51d8d).
+2023-11-28 18:56:31,100 - INFO: logging in using static token
+2023-11-28 18:56:31,940 - INFO: Shard ID None has connected to Gateway (Session ID: 9751111f93a612996c4662a99657d382).

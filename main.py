@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from discord.ext.commands import HelpCommand
+import logging
 
 intents = discord.Intents.default()
 intents.messages = True
@@ -34,7 +35,7 @@ async def on_ready():
     print(f'Connecté sur le bot : {bot.user.name} avec son n° identifiant : {bot.user.id}')
     print('------')
 
-@bot.command(name='afficher_commandes')
+@bot.command(name='commandes')
 async def afficher_commandes(ctx):
     # Tri des commandes par nom
     command_list = [f'`{command.name}`' for command in sorted(bot.commands, key=lambda x: x.name)]
@@ -80,7 +81,7 @@ annonce_id_counter = 1
 async def ajouter_annonce(ctx, canal: str = None, *, message: str = None):
     global annonce_id_counter
     if isinstance(ctx.author, discord.Member):
-        if "Admin" in [role.name for role in ctx.author.roles]:
+        #if "Admin" in [role.name for role in ctx.author.roles]:
             # Vérifier si le nom ou l'ID du canal est spécifié
             if canal is None:
                 await ctx.send("Veuillez spécifier le nom ou l'ID du canal et le message que vous souhaitez annoncer.")
@@ -122,12 +123,13 @@ async def ajouter_annonce(ctx, canal: str = None, *, message: str = None):
             annonces[annonce_id]["message_id"] = sent_message.id  # Enregistrez l'ID du message
 
             await ctx.send(f'L\'annonce n°{annonce_id} ajoutée avec succès sur le canal #{found_channel.name} !')
-        else:
-            await ctx.send('Vous n\'avez pas les permissions nécessaires.')
+        #else:
+        #    await ctx.send('Vous n\'avez pas les permissions nécessaires.')
     else:
         await ctx.send('Cette commande doit être exécutée sur un serveur, pas en message privé.')
 
 @bot.command(name='modifier_annonce')
+@commands.has_permissions(administrator=True)
 async def modifier_annonce(ctx, annonce_id: int = None, new_message: str = None):
     if isinstance(ctx.author, discord.Member):
         if "Admin" in [role.name for role in ctx.author.roles]:
@@ -168,6 +170,7 @@ async def modifier_annonce(ctx, annonce_id: int = None, new_message: str = None)
         await ctx.send('Cette commande doit être exécutée sur un serveur, pas en message privé.')
 
 @bot.command(name='supprimer_annonce')
+@commands.has_permissions(administrator=True)
 async def supprimer_annonce(ctx, annonce_id: int = None):
     if isinstance(ctx.author, discord.Member):
         if "Admin" in [role.name for role in ctx.author.roles]:
@@ -201,7 +204,8 @@ async def supprimer_annonce(ctx, annonce_id: int = None):
     else:
         await ctx.send('Cette commande doit être exécutée sur un serveur, pas en message privé.')
 
-@bot.command(name='afficher_annonces')
+@bot.command(name='annonces')
+@commands.has_permissions(administrator=True)
 async def afficher_annonces(ctx):
     # Vérifier si l'utilisateur a le rôle d'administrateur
     if "Admin" in [role.name for role in ctx.author.roles]:
@@ -272,13 +276,16 @@ async def ouvrir_ticket(ctx, *, sujet=None):
 @bot.command(name='fermer_ticket')
 @commands.has_permissions(administrator=True)
 async def fermer_ticket(ctx, ticket_id: int = None):
-    # Si aucun ticket_id n'est fourni
-    if ticket_id is None:
-        await ctx.send("Veuillez spécifier l'ID du ticket que vous souhaitez fermer.")
-        return
+    if "Admin" in [role.name for role in ctx.author.roles]:
+        # Si aucun ticket_id n'est fourni
+        if ticket_id is None:
+            await ctx.send("Veuillez spécifier l'ID du ticket que vous souhaitez fermer.")
+            return
 
-    # Appeler la fonction pour fermer un ticket spécifique
-    await fermer_ticket_specifique(ctx, ticket_id)
+        # Appeler la fonction pour fermer un ticket spécifique
+        await fermer_ticket_specifique(ctx, ticket_id)
+    else:
+        await ctx.send('Vous n\'avez pas les permissions nécessaires.')
 
 # Fonction pour fermer un ticket spécifique
 async def fermer_ticket_specifique(ctx, ticket_id: int):
@@ -313,7 +320,8 @@ async def fermer_ticket_specifique(ctx, ticket_id: int):
 @bot.command(name='tickets')
 async def voir_tickets(ctx):
     # Vérifie si l'auteur de la commande est un administrateur
-    if ctx.author.guild_permissions.administrator:
+    #if ctx.author.guild_permissions.administrator:
+    if "Admin" in [role.name for role in ctx.author.roles]:
         # Affiche la liste des tickets ouverts avec leurs ID et le nom du sujet
         tickets_info = [f"Ticket : {ticket_id} - Sujet : {ticket_sujet}" 
                         for (ticket_id, ticket_sujet) in tickets_ouverts.values()]
@@ -330,6 +338,51 @@ async def voir_tickets(ctx):
             await ctx.send(f"Vous avez un ticket ouvert - Sujet : {ticket_sujet} - Numéro du ticket : {ticket_id}")
         else:
             await ctx.send("Vous n'avez actuellement aucun ticket ouvert.")
+
+
+# Configuration des journaux
+logging.basicConfig(filename='bot_logs.log', level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
+
+# ID du canal Discord où vous souhaitez envoyer les logs
+log_channel_id = 1178676165041459291
+
+# Fonction pour envoyer un message de log à Discord
+async def send_logs_to_channel(log_message):
+    log_channel = bot.get_channel(log_channel_id)
+    if log_channel:
+        await log_channel.send(log_message)
+
+# Commande pour afficher l'historique des logs
+@bot.command(name='logs')
+@commands.has_permissions(administrator=True)
+async def get_logs(ctx):
+    if "Admin" in [role.name for role in ctx.author.roles]:
+        try:
+            # Lire le contenu du fichier de logs
+            with open('bot_logs.log', 'r') as file:
+                logs_content = file.read()
+
+            # Envoyer le contenu des logs dans le canal Discord
+            await ctx.send(f"```\n{logs_content}\n```")
+
+        except FileNotFoundError:
+            await ctx.send("Aucun log trouvé.")
+    else:
+        await ctx.send('Vous n\'avez pas les permissions nécessaires.')
+
+# Exemple de log
+@bot.command(name='ma_commande')
+async def ma_commande(ctx):
+    # Vérifier si l'utilisateur a la permission d'exécuter cette commande
+    if not ctx.author.guild_permissions.administrator:
+        await ctx.send("Vous n'avez pas la permission d'accéder aux logs.")
+        return
+    
+    # Exemple de log
+    logging.info(f"L'utilisateur {ctx.author} a exécuté la commande !ma_commande.")
+    
+    # Envoyer le log au canal Discord spécifié
+    #await send_logs_to_channel(f"L'utilisateur {ctx.author} a exécuté la commande !ma_commande.")
 
 
 bot.run('MTE3ODM4NTExMTY2NjkzMzg5MQ.GCBXvS.c_onrPj3Ll9yhAauSJEN4TGY3QjDi5-gFtpc6g')
