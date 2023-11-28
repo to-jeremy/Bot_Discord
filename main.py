@@ -141,6 +141,40 @@ async def modifier_annonce(ctx, annonce_id: int = None, new_message: str = None)
     else:
         await ctx.send('Cette commande doit être exécutée sur un serveur, pas en message privé.')
 
+@bot.command(name='supprimer_annonce')
+async def supprimer_annonce(ctx, annonce_id: int = None):
+    if isinstance(ctx.author, discord.Member):
+        if "Admin" in [role.name for role in ctx.author.roles]:
+            # Vérifier si l'ID de l'annonce est spécifié
+            if annonce_id is None:
+                await ctx.send("Veuillez spécifier l'ID de l'annonce que vous souhaitez supprimer.")
+                return
+
+            # Vérifier si l'annonce existe
+            if annonce_id not in annonces:
+                await ctx.send(f'Aucune annonce avec l\'ID {annonce_id} n\'a été trouvée.')
+                return
+
+            annonce = annonces[annonce_id]
+
+            # Supprimer l'annonce du dictionnaire
+            del annonces[annonce_id]
+
+            # Supprimer le message dans le canal existant
+            try:
+                sent_message = await bot.get_channel(annonce["channel_id"]).fetch_message(annonce["message_id"])
+                if sent_message:
+                    await sent_message.delete()
+                    await ctx.send(f'L\'annonce n° {annonce_id} a été supprimée avec succès.')
+                else:
+                    await ctx.send(f'Impossible de trouver le message d\'annonce avec l\'ID {annonce["message_id"]}.')
+            except discord.NotFound:
+                await ctx.send(f'Impossible de trouver le message d\'annonce avec l\'ID {annonce["message_id"]}.')
+        else:
+            await ctx.send('Vous n\'avez pas les permissions nécessaires.')
+    else:
+        await ctx.send('Cette commande doit être exécutée sur un serveur, pas en message privé.')
+
 @bot.command(name='afficher_annonces')
 async def afficher_annonces(ctx):
     # Vérifier si l'utilisateur a le rôle d'administrateur
