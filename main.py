@@ -53,11 +53,12 @@ async def presentation(ctx):
         title="Présentation du Bot",
         description="Je suis un bot Discord en cours de développement donc je suis hébergé localement par mon créateur ! Pour le moment, je suis en phase des tests.",
         color=0x3498db  # Couleur bleue
+        #color=0xff0000  # Couleur rouge
     )
 
     embed.add_field(
         name="Fonctionnalités principales",
-        value="1. Annonces\n2. Tickets\n",
+        value="1. Annonces\n2. Tickets\n3. Manuel de commandes",
         inline=False
     )
 
