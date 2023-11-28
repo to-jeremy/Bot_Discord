@@ -1,0 +1,56 @@
+INFO:discord.client:logging in using static token
+INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: 058242bbfbaeb043f2368caf9f4c24ee).
+INFO:discord.client:logging in using static token
+INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: 69bfd834f5794d4fa4a0e1caceda98ab).
+INFO:root:Action réussie : Commande exécutée avec succès.
+INFO:discord.client:logging in using static token
+INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: 8bd77a4f05a35498f60d0dca17cd0837).
+INFO:discord.client:logging in using static token
+INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: 71e38f5c7cb531e6b71aaf46e296eef3).
+INFO:discord.client:logging in using static token
+INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: e41bdee9fdc4b6f11a9ab1791b636320).
+INFO:discord.client:logging in using static token
+INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: 6503fcad2b3778255e75799dd0d99266).
+INFO:root:L'utilisateur darkofu a exécuté la commande !ma_commande.
+INFO:discord.client:logging in using static token
+INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: b398a284a754862c0aa1c7ac8cd51d8d).
+2023-11-28 18:56:31,100 - INFO: logging in using static token
+2023-11-28 18:56:31,940 - INFO: Shard ID None has connected to Gateway (Session ID: 9751111f93a612996c4662a99657d382).
+2023-11-28 19:11:08,825 - INFO: logging in using static token
+2023-11-28 19:11:09,729 - INFO: Shard ID None has connected to Gateway (Session ID: 4e8a83f97083f86649381bba1f1af0f7).
+2023-11-28 19:19:34,099 - INFO: logging in using static token
+2023-11-28 19:19:35,096 - INFO: Shard ID None has connected to Gateway (Session ID: 778363745847c698fa6141ddc657c716).
+2023-11-28 19:22:18,804 - INFO: logging in using static token
+2023-11-28 19:22:19,801 - INFO: Shard ID None has connected to Gateway (Session ID: 0ae3c3d33360dfe5e39fb6f0d7709600).
+2023-11-28 19:22:46,869 - INFO: logging in using static token
+2023-11-28 19:22:47,734 - INFO: Shard ID None has connected to Gateway (Session ID: 4e2a3a812d534f99a74c424f806d84a2).
+2023-11-28 19:28:35,428 - INFO: logging in using static token
+2023-11-28 19:28:36,302 - INFO: Shard ID None has connected to Gateway (Session ID: 2d29c53f62f1c9da7f63420f420a3a98).
+2023-11-28 19:29:48,345 - INFO: logging in using static token
+2023-11-28 19:29:49,363 - INFO: Shard ID None has connected to Gateway (Session ID: e8ebd59266ab569b410950898c32717c).
+2023-11-28 19:35:57,584 - INFO: logging in using static token
+2023-11-28 19:35:58,441 - INFO: Shard ID None has connected to Gateway (Session ID: 31622951ff2260600cb8cd654efe2a8b).
+2023-11-28 19:45:38,483 - INFO: logging in using static token
+2023-11-28 19:45:39,401 - INFO: Shard ID None has connected to Gateway (Session ID: 32cd748e3b886e27d89b4533028fdc3c).
+2023-11-28 19:46:39,299 - INFO: logging in using static token
+2023-11-28 19:46:40,175 - INFO: Shard ID None has connected to Gateway (Session ID: e500d059d5138e5e0f63e26fff7c31e4).
+2023-11-28 19:47:02,684 - INFO: logging in using static token
+2023-11-28 19:47:03,612 - INFO: Shard ID None has connected to Gateway (Session ID: 14e859bab3ae7efdac29c0774906f418).
+2023-11-28 19:49:10,022 - INFO: logging in using static token
+2023-11-28 19:49:10,923 - INFO: Shard ID None has connected to Gateway (Session ID: a53c03e875252c2aa6db501e9f0fbeb9).
+2023-11-28 19:49:58,662 - INFO: logging in using static token
+2023-11-28 19:49:59,448 - INFO: Shard ID None has connected to Gateway (Session ID: 96acc4007e84330320d0cd1184bf0445).
+2023-11-28 19:50:52,723 - INFO: logging in using static token
+2023-11-28 19:50:53,674 - INFO: Shard ID None has connected to Gateway (Session ID: 9101a4b5b6a69ec0d8040e022cfd443d).
+2023-11-28 19:51:49,188 - INFO: logging in using static token
+2023-11-28 19:51:50,116 - INFO: Shard ID None has connected to Gateway (Session ID: 386f6eb33c4aaeb40020257d123fda0e).
+2023-11-28 19:53:42,181 - INFO: logging in using static token
+2023-11-28 19:53:43,050 - INFO: Shard ID None has connected to Gateway (Session ID: 42224a9aebdc8e75b49347414d2f14d7).
+2023-11-28 19:54:25,616 - INFO: logging in using static token
+2023-11-28 19:54:26,422 - INFO: Shard ID None has connected to Gateway (Session ID: 21470bafda15fb2e9bd5995d3fa20fe3).
+2023-11-28 19:55:20,345 - INFO: logging in using static token
+2023-11-28 19:55:21,265 - INFO: Shard ID None has connected to Gateway (Session ID: 65f8437d4df695db82e3bdaf96446d83).
+2023-11-28 19:55:41,525 - INFO: logging in using static token
+2023-11-28 19:55:42,439 - INFO: Shard ID None has connected to Gateway (Session ID: be2042b3c058046f178da8853da5eb45).
+2023-11-28 19:56:22,875 - INFO: logging in using static token
+2023-11-28 19:56:23,715 - INFO: Shard ID None has connected to Gateway (Session ID: 8aaf0bfd0a49ee3e74cce33a943ea819).
