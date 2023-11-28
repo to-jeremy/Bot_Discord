@@ -1,7 +1,7 @@
 import discord
+import logging
 from discord.ext import commands
 from discord.ext.commands import HelpCommand
-import logging
 
 intents = discord.Intents.default()
 intents.messages = True
@@ -70,6 +70,41 @@ async def presentation(ctx):
     )
 
     embed.set_footer(text="*Le Serviteur*")
+
+    await ctx.send(embed=embed)
+
+
+@bot.command(name='nouveautes')
+async def nouveautes(ctx):
+    embed = discord.Embed(
+        title="Changements effectuées",
+        description="Découvrez les dernières nouveautés et mises à jour de notre bot !\n",
+        color=0x3498db  # Couleur bleue
+    )
+
+    embed.add_field(
+        name="V1 (28/11/2023)",
+        value="",
+        inline=False
+    )
+
+    # Section Nouveautés
+    embed.add_field(
+        name="Nouveautés",
+        value="1. Suppressions des annonces publiées\n"
+              "2. Présentations : Bot, Nouveautés et Mises à Jour",
+        inline=False
+    )
+
+    # Section Mises à Jour
+    embed.add_field(
+        name="Mises à Jour",
+        value="1. Commandes : Rectification des droits d'utilisateurs pour les commandes\n"
+              "2. Manuel : Ajout de nouveaux commandes",
+        inline=False
+    )
+
+    embed.set_footer(text="Merci beaucoup !")
 
     await ctx.send(embed=embed)
 
