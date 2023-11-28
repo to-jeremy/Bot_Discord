@@ -15,16 +15,17 @@ class Commande_Aide(HelpCommand):
         return f"{self.context.prefix}{command.qualified_name} {command.signature}"
 
     async def send_bot_help(self, mapping):
-        embed = discord.Embed(title="Commandes du Bot", color=0x00ff00)
+        embed = discord.Embed(title="Manuel du Bot", color=0x00ff00)
 
         for cog, commands in mapping.items():
-            command_signatures = [self.get_command_signature(c) for c in commands]
+            command_signatures = [self.get_command_signature(c) for c in sorted(commands, key=lambda x: x.name)]
             if command_signatures:
-                cog_name = getattr(cog, "qualified_name", "Autre")
+                cog_name = getattr(cog, "qualified_name", "Commandes")
                 embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
 
         channel = self.get_destination()
         await channel.send(embed=embed)
+
 
 bot = commands.Bot(command_prefix='!', intents=intents, help_command=Commande_Aide())
 
@@ -35,7 +36,8 @@ async def on_ready():
 
 @bot.command(name='afficher_commandes')
 async def afficher_commandes(ctx):
-    command_list = [f'`{command.name}`' for command in bot.commands]
+    # Tri des commandes par nom
+    command_list = [f'`{command.name}`' for command in sorted(bot.commands, key=lambda x: x.name)]
     commands_str = ', '.join(command_list)
     await ctx.send(f'Commandes disponibles : {commands_str}')
 
@@ -45,45 +47,177 @@ async def on_command_error(ctx, error):
         await ctx.send(f"Commande non valide. Utilisez `{ctx.prefix}afficher_commandes` pour voir les commandes disponibles.")
 
 
-@bot.command(name='annonce')
-async def annonce(ctx, canal: str = None, *, message: str = None):
-    # Assurez-vous que le contexte est un objet Member
+@bot.command(name='presentation')
+async def presentation(ctx):
+    embed = discord.Embed(
+        title="Présentation du Bot",
+        description="Je suis un bot Discord en cours de développement donc je suis hébergé localement par mon créateur ! Pour le moment, je suis en phase des tests.",
+        color=0x3498db  # Couleur bleue
+    )
+
+    embed.add_field(
+        name="Fonctionnalités principales",
+        value="1. Annonces\n2. Tickets\n",
+        inline=False
+    )
+
+    embed.add_field(
+        name="Commandes",
+        value="Utilisez `!help` ou `!afficher_commandes` pour afficher la liste des commandes disponibles.",
+        inline=False
+    )
+
+    embed.set_footer(text="*Le Serviteur*")
+
+    await ctx.send(embed=embed)
+
+
+annonces = {}  # Dictionnaire pour stocker les annonces avec leur ID comme clé
+annonce_id_counter = 1
+
+@bot.command(name='ajouter_annonce')
+async def ajouter_annonce(ctx, canal: str = None, *, message: str = None):
+    global annonce_id_counter
     if isinstance(ctx.author, discord.Member):
         if "Admin" in [role.name for role in ctx.author.roles]:
-            if canal is None and message is None:
-                await ctx.send("Veuillez spécifier le nom du canal et le message que vous souhaitez annoncer.")
+            # Vérifier si le nom ou l'ID du canal est spécifié
+            if canal is None:
+                await ctx.send("Veuillez spécifier le nom ou l'ID du canal et le message que vous souhaitez annoncer.")
                 return
-            elif canal is not None and message is None:
-                found_channel = None
+
+            found_channel = None
+            # Vérifiez si le canal est un numéro d'identifiant
+            if canal.isdigit():
+                found_channel = ctx.guild.get_channel(int(canal))
+            else:
+                # Recherchez le canal par nom
                 for channel in ctx.guild.text_channels:
                     if canal.lower() in channel.name.lower():
                         found_channel = channel
                         break
 
-                if found_channel is not None:
-                    await ctx.send("Veuillez spécifier le message que vous souhaitez annoncer.")
-                else:
-                    await ctx.send(f'Aucun canal "{canal}" n\'a été trouvé sur le serveur.')
+            # Vérifier si le canal existe
+            if found_channel is None:
+                await ctx.send(f'Aucun canal "{canal}" n\'a été trouvé sur le serveur.')
                 return
 
-            found_channel = None
-            for channel in ctx.guild.text_channels:
-                if canal is not None and canal.lower() in channel.name.lower():
-                    found_channel = channel
-                    break
+            # Vérifier si le message est spécifié
+            if message is None:
+                await ctx.send("Veuillez spécifier le message que vous souhaitez annoncer.")
+                return
 
-            if found_channel is not None:
-                await found_channel.send(message)
-                print(f'Annonce envoyée avec succès sur le canal #{found_channel.name} !')
-            else:
-                if canal is not None:
-                    await ctx.send(f'Aucun canal "{canal}" trouvé sur le serveur.')
-                else:
-                    await ctx.send("Veuillez spécifier le nom du canal sur lequel vous souhaitez envoyer l'annonce.")
+            annonce_id = annonce_id_counter
+            annonce_id_counter += 1
+
+            # Stockez l'annonce dans le dictionnaire
+            annonces[annonce_id] = {
+                "channel_id": found_channel.id,
+                "message": message,
+                "message_preview": message[:50]
+            }
+
+            # Envoyer le message dans le canal spécifié
+            sent_message = await found_channel.send(f"{message}")
+            annonces[annonce_id]["message_id"] = sent_message.id  # Enregistrez l'ID du message
+
+            await ctx.send(f'L\'annonce n°{annonce_id} ajoutée avec succès sur le canal #{found_channel.name} !')
         else:
             await ctx.send('Vous n\'avez pas les permissions nécessaires.')
     else:
         await ctx.send('Cette commande doit être exécutée sur un serveur, pas en message privé.')
+
+@bot.command(name='modifier_annonce')
+async def modifier_annonce(ctx, annonce_id: int = None, new_message: str = None):
+    if isinstance(ctx.author, discord.Member):
+        if "Admin" in [role.name for role in ctx.author.roles]:
+            # Vérifier si l'ID de l'annonce est spécifié
+            if annonce_id is None:
+                await ctx.send("Veuillez spécifier l'ID de l'annonce que vous souhaitez modifier.")
+                return
+
+            if annonce_id not in annonces:
+                await ctx.send(f'Aucune annonce avec l\'ID {annonce_id} n\'a été trouvée.')
+                return
+
+            annonce = annonces[annonce_id]
+
+            # Vérifier si le message est modifié
+            if new_message is not None:
+                annonce["message"] = new_message
+                annonce["message_preview"] = new_message[:50]
+
+            # Vérifier si le nouveau message est spécifié
+            if new_message is None:
+                await ctx.send("Veuillez spécifier le nouveau message que vous souhaitez définir.")
+                return
+
+            # Mettre à jour le message dans le canal existant
+            try:
+                sent_message = await bot.get_channel(annonce["channel_id"]).fetch_message(annonce["message_id"])
+                if sent_message:
+                    await sent_message.edit(content=f"{new_message}")
+                    await ctx.send(f'L\'annonce n° {annonce_id} modifiée avec succès.')
+                else:
+                    await ctx.send(f'Impossible de trouver le message d\'annonce avec l\'ID {annonce["message_id"]}.')
+            except discord.NotFound:
+                await ctx.send(f'Impossible de trouver le message d\'annonce avec l\'ID {annonce["message_id"]}.')
+        else:
+            await ctx.send('Vous n\'avez pas les permissions nécessaires.')
+    else:
+        await ctx.send('Cette commande doit être exécutée sur un serveur, pas en message privé.')
+
+@bot.command(name='supprimer_annonce')
+async def supprimer_annonce(ctx, annonce_id: int = None):
+    if isinstance(ctx.author, discord.Member):
+        if "Admin" in [role.name for role in ctx.author.roles]:
+            # Vérifier si l'ID de l'annonce est spécifié
+            if annonce_id is None:
+                await ctx.send("Veuillez spécifier l'ID de l'annonce que vous souhaitez supprimer.")
+                return
+
+            # Vérifier si l'annonce existe
+            if annonce_id not in annonces:
+                await ctx.send(f'Aucune annonce avec l\'ID {annonce_id} n\'a été trouvée.')
+                return
+
+            annonce = annonces[annonce_id]
+
+            # Supprimer l'annonce du dictionnaire
+            del annonces[annonce_id]
+
+            # Supprimer le message dans le canal existant
+            try:
+                sent_message = await bot.get_channel(annonce["channel_id"]).fetch_message(annonce["message_id"])
+                if sent_message:
+                    await sent_message.delete()
+                    await ctx.send(f'L\'annonce n° {annonce_id} a été supprimée avec succès.')
+                else:
+                    await ctx.send(f'Impossible de trouver le message d\'annonce avec l\'ID {annonce["message_id"]}.')
+            except discord.NotFound:
+                await ctx.send(f'Impossible de trouver le message d\'annonce avec l\'ID {annonce["message_id"]}.')
+        else:
+            await ctx.send('Vous n\'avez pas les permissions nécessaires.')
+    else:
+        await ctx.send('Cette commande doit être exécutée sur un serveur, pas en message privé.')
+
+@bot.command(name='afficher_annonces')
+async def afficher_annonces(ctx):
+    # Vérifier si l'utilisateur a le rôle d'administrateur
+    if "Admin" in [role.name for role in ctx.author.roles]:
+        if annonces:
+            annonces_info = []
+            for annonce_id, annonce_data in annonces.items():
+                channel_name = bot.get_channel(annonce_data["channel_id"]).name
+                message_id = annonce_data["message_id"]
+                message_preview = annonce_data["message_preview"]  # Afficher les 50 premiers caractères du message
+                annonces_info.append(f"N° de l'annonce : {annonce_id} | Salon : {channel_name} | Message : {message_preview}")
+
+            annonces_str = '\n'.join(annonces_info)
+            await ctx.send(f'Liste des annonces :\n-------------------- \n{annonces_str}')
+        else:
+            await ctx.send('Aucune annonce n\'a été ajoutée.')
+    else:
+        await ctx.send('Vous n\'avez pas les permissions nécessaires.')
 
 
 tickets_ouverts = {}
@@ -123,7 +257,7 @@ async def ouvrir_ticket(ctx, *, sujet=None):
     # Envoyer un message d'accueil dans le canal du ticket
     try:
         await ticket_channel.send(f"Bienvenue dans votre ticket ! Sujet : {sujet}")
-        print("Ticket ouvert - Sujet :", sujet, "- Numéro du canal :", ticket_channel.id)
+        print("Ticket ouvert - Sujet :", sujet, "- N° du canal :", ticket_channel.id)
     except discord.Forbidden:
         print("Le bot n'a pas les autorisations nécessaires pour envoyer des messages dans le canal.")
         await ctx.send("Le bot n'a pas les autorisations nécessaires pour envoyer des messages dans le canal de ticket.")
@@ -149,7 +283,7 @@ async def fermer_ticket(ctx, ticket_id: int = None):
 async def fermer_ticket_specifique(ctx, ticket_id: int):
     # Vérifie si le ticket_id existe dans le dictionnaire
     if ticket_id not in {v[0] for v in tickets_ouverts.values()}:
-        await ctx.send(f"Ticket avec l'ID {ticket_id} non trouvé.")
+        await ctx.send(f"Ticket avec l'ID n°{ticket_id} non trouvé.")
         return
 
     # Trouver l'utilisateur associé à ce ticket_id
@@ -172,7 +306,7 @@ async def fermer_ticket_specifique(ctx, ticket_id: int):
         del tickets_ouverts[user_id]
 
     # Informer l'administrateur que le ticket a été fermé avec le nom du sujet
-    await ctx.send(f"Le ticket avec l'ID {ticket_id} (Sujet: {sujet_ticket}) a été fermé avec succès.")
+    await ctx.send(f"Le ticket avec l'ID n°{ticket_id} (Sujet : {sujet_ticket}) a été fermé avec succès.")
 
 
 @bot.command(name='tickets')
