@@ -2,9 +2,9 @@
 Entrainement à la création d'un bot discord en Python
 
 <strong>26/11/23</strong><br>
-<I>Lancement du mini projet</I>
-    --> Tutoriels pour la création d'un bot Discord
-    --> Installation des paquets
+<I>Lancement du mini projet</I><br>
+    --> Tutoriels pour la création d'un bot Discord<br>
+    --> Installation des paquets<br>
 
 <strong>27/11/23</strong><br>
 <i>Version 1 :</i>
