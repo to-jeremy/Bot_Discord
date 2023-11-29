@@ -3,12 +3,13 @@ import logging
 from discord.ext import commands
 from discord.ext.commands import HelpCommand
 import json
-import os
 
 intents = discord.Intents.default()
 intents.messages = True
 intents.guilds = True
 intents.message_content = True
+
+# --- Partie HelpCommand ---
 
 class Commande_Aide(HelpCommand):
     def command_not_found(self, string):
@@ -37,6 +38,8 @@ async def on_ready():
     print(f'Connecté sur le bot : {bot.user.name} avec son n° identifiant : {bot.user.id}')
     print('------')
 
+# --- Partie Commandes Disponibles ---
+
 @bot.command(name='commandes')
 async def afficher_commandes(ctx):
     # Tri des commandes par nom
@@ -44,11 +47,14 @@ async def afficher_commandes(ctx):
     commands_str = ', '.join(command_list)
     await ctx.send(f'Commandes disponibles : {commands_str}')
 
+# --- Partie Erreurs Commandes ---
+
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send(f"Commande non valide. Utilisez `{ctx.prefix}afficher_commandes` pour voir les commandes disponibles.")
 
+# --- Partie Présentation du bot ---
 
 @bot.command(name='presentation')
 async def presentation(ctx):
@@ -469,6 +475,7 @@ async def voir_tickets(ctx):
         else:
             await ctx.send("Vous n'avez actuellement aucun ticket ouvert.")
 
+# --- Partie Configuration des logs ---
 
 # Configuration des journaux
 logging.basicConfig(filename='bot_logs.log', level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
@@ -499,20 +506,6 @@ async def get_logs(ctx):
             await ctx.send("Aucun log trouvé.")
     else:
         await ctx.send('Vous n\'avez pas les permissions nécessaires.')
-
-# # Exemple de log
-# @bot.command(name='ma_commande')
-# async def ma_commande(ctx):
-#     # Vérifier si l'utilisateur a la permission d'exécuter cette commande
-#     if not ctx.author.guild_permissions.administrator:
-#         await ctx.send("Vous n'avez pas la permission d'accéder aux logs.")
-#         return
-    
-#     # Exemple de log
-#     logging.info(f"L'utilisateur {ctx.author} a exécuté la commande !ma_commande.")
-    
-#     # Envoyer le log au canal Discord spécifié
-#     #await send_logs_to_channel(f"L'utilisateur {ctx.author} a exécuté la commande !ma_commande.")
 
 
 bot.run('MTE3ODM4NTExMTY2NjkzMzg5MQ.GCBXvS.c_onrPj3Ll9yhAauSJEN4TGY3QjDi5-gFtpc6g')
