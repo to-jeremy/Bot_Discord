@@ -1,1 +1,17 @@
-{"annonces": {}}
+{
+  "annonces": {
+    "3": {
+      "channel_id": 1178789354181759067,
+      "message": "-----------",
+      "message_preview": "-----------",
+      "message_id": 1179391204551577731
+    },
+    "7": {
+      "channel_id": 1178789354181759067,
+      "message": "YES YES",
+      "message_preview": "YES YES",
+      "message_id": 1179391893310799893
+    }
+  },
+  "annonce_id_counter": 8
+}
