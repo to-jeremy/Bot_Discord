@@ -189,13 +189,13 @@ else:
 
 def chargements_annonces():
     try:
-        with open('annonces.json', 'r') as file:
+        with open('annonces_data.json', 'r') as file:
             return json.load(file)
     except FileNotFoundError:
         return {"annonces": {}, "annonce_id_counter": 1}
 
 def sauvegarder_annonces(annonces_data):
-    with open('annonces.json', 'w') as file:
+    with open('annonces_data.json', 'w') as file:
         json.dump(annonces_data, file, indent=2)
 
 @bot.command(name='ajouter_annonce')
