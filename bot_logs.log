@@ -209,3 +209,5 @@ INFO:discord.gateway:Shard ID None has connected to Gateway (Session ID: b398a28
 2023-11-29 12:58:22,001 - INFO: Shard ID None has connected to Gateway (Session ID: e808bb4077fa6bc14475476bc0dbff47).
 2023-11-29 13:00:10,289 - INFO: logging in using static token
 2023-11-29 13:00:11,418 - INFO: Shard ID None has connected to Gateway (Session ID: 3705cb15dd923959ad691e29169bf090).
+2023-11-29 13:03:02,807 - INFO: logging in using static token
+2023-11-29 13:03:03,948 - INFO: Shard ID None has connected to Gateway (Session ID: 0f9f28582062ccfee3bfc40a5c404c0a).
