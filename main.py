@@ -76,16 +76,16 @@ async def presentation(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command(name='nouveautes')
-async def nouveautes(ctx):
-    embed = discord.Embed(
-        title="Changements effectuées",
-        description="Découvrez les dernières nouveautés et mises à jour de notre bot !\n",
-        color=0x3498db  # Couleur bleue
-    )
+# --- Partie Présentations changements sur le bot ---
+
+# Définition de la fonction pour mettre à jour les informations
+def mettre_a_jour_nouveautes(embed, version_data):
+    version = version_data.get("version", "")
+    nouveautes = version_data.get("nouveautes", [])
+    mises_a_jour = version_data.get("mises_a_jour", [])
 
     embed.add_field(
-        name="V1 (28/11/2023)",
+        name=f"V{version}",
         value="",
         inline=False
     )
@@ -93,22 +93,80 @@ async def nouveautes(ctx):
     # Section Nouveautés
     embed.add_field(
         name="Nouveautés",
-        value="1. Suppressions des annonces publiées\n"
-              "2. Présentations : Bot, Nouveautés et Mises à Jour",
+        value="\n".join(nouveautes),
         inline=False
     )
 
     # Section Mises à Jour
     embed.add_field(
         name="Mises à Jour",
-        value="1. Commandes : Rectification des droits d'utilisateurs pour les commandes\n"
-              "2. Manuel : Ajout de nouveaux commandes",
+        value="\n".join(mises_a_jour),
         inline=False
     )
 
     embed.set_footer(text="Merci beaucoup !")
 
+# Définition de la commande nouveautes
+@bot.command(name='nouveautes')
+async def fct_nouveautes(ctx):
+    embed = discord.Embed(
+        title="Changements effectuées",
+        description="Découvrez les dernières nouveautés et mises à jour de notre bot !\n",
+        color=0x3498db  # Couleur bleue
+    )
+
+    # Charger les informations depuis un fichier JSON
+    try:
+        with open('nouveautes_data.json', 'r') as file:
+            data = json.load(file)
+            versions = data.get("versions", [])
+            if versions:
+                # Afficher uniquement la dernière version
+                derniere_version = versions[-1]
+                mettre_a_jour_nouveautes(embed, derniere_version)
+    except FileNotFoundError:
+        print("Le fichier 'nouveautes_data.json' n'a pas été trouvé.")
+        return
+    except json.JSONDecodeError as e:
+        print(f"Erreur lors du décodage JSON : {e}")
+        return
+
     await ctx.send(embed=embed)
+
+# Sauvegarde des données dans un fichier
+nouveautes = [
+    "Changements de méthode pour le stockage des données \nCréation d'un fichier JSON",
+]
+
+mises_a_jour = [
+    "Pas de mises à jour importantes",
+]
+
+donnees = {
+    'version': '1.1 (29/11/2023)',
+    'nouveautes': nouveautes,
+    'mises_a_jour': mises_a_jour
+}
+
+# Charger les anciennes données depuis le fichier JSON
+try:
+    with open('nouveautes_data.json', 'r') as file:
+        anciennes_donnees = json.load(file)
+except FileNotFoundError:
+    # Si le fichier n'existe pas, initialisez les données comme un dictionnaire vide ou une structure appropriée
+    anciennes_donnees = {'versions': []}
+
+# Vérifier si la version actuelle est déjà présente dans les données
+version_actuelle = donnees['version']
+versions_existantes = [v.get('version') for v in anciennes_donnees['versions']]
+
+if version_actuelle not in versions_existantes:
+    # Ajouter les nouvelles données aux anciennes données
+    anciennes_donnees['versions'].append(donnees)
+
+    # Sauvegarder les données mises à jour dans le fichier JSON
+    with open('nouveautes_data.json', 'w') as file:
+        json.dump(anciennes_donnees, file, indent=4)
 
 
 # --- Partie Annonces ---
