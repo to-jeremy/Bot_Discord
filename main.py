@@ -408,9 +408,21 @@ def afficher_liste_tickets(data):
     tickets_fermes = [ticket for ticket in data['tickets'] if ticket['statut'] == 'fermer']
     return tickets_ouverts, tickets_fermes
 
-def chercher_pseudo_auteur(guild, auteur_id):
-    membre = guild.get_member(auteur_id)
-    return membre.name if membre else "Membre introuvable"
+async def chercher_pseudo_auteur(guild, auteur_id):
+    try:
+        # Charger les données des tickets depuis le fichier JSON
+        tickets_data = charger_tickets()
+
+        # Chercher l'auteur dans les données des tickets
+        for ticket in tickets_data['tickets']:
+            if ticket['auteur_id'] == auteur_id:
+                return ticket['auteur_nom']
+
+        # Si l'auteur n'est pas trouvé, renvoyer un message approprié
+        return f"Membre introuvable (n° ID : {auteur_id})"
+    except discord.NotFound:
+        return f"Membre introuvable (n° ID : {auteur_id})"
+
 
 def chercher_canal_ticket(guild, canal_id):
     for canal in guild.channels:
@@ -461,7 +473,7 @@ async def ouvrir_ticket(ctx, *, sujet=None):
         return
 
     # Informer l'utilisateur que le ticket a été créé
-    await ctx.send(f"Votre ticket a été ouvert avec succès ! Vous pouvez le trouver dans {ticket_channel.mention} avec le n° ID : {ticket_id}.")
+    await ctx.send(f"Votre ticket a été ouvert avec succès ! Vous pouvez le trouver dans {ticket_channel.mention} avec le n°{ticket_id}.")
 
 @bot.command(name='fermer_ticket')
 @commands.has_permissions(administrator=True)
@@ -484,9 +496,9 @@ async def fct_fermer_ticket(ctx, ticket_id: int = None):
             if ticket_channel:
                 await ticket_channel.delete()
 
-            await ctx.send(f"Le ticket avec l'ID n°{ticket_id} a été fermé avec succès, et le canal a été supprimé.")
+            await ctx.send(f"Le ticket avec le n°{ticket_id} a été fermé avec succès, et le canal a été supprimé.")
         else:
-            await ctx.send(f"Impossible de trouver le ticket avec l'ID n°{ticket_id} ou il est déjà fermé.")
+            await ctx.send(f"Impossible de trouver le ticket avec le n°{ticket_id} ou il est déjà fermé.")
     else:
         await ctx.send("Vous n'avez pas les permissions nécessaires.")
 
@@ -498,14 +510,14 @@ async def voir_tickets(ctx):
     if "Admin" in [role.name for role in ctx.author.roles]:
         tickets_ouverts, tickets_fermes = afficher_liste_tickets(tickets_data)
         
-        message_ouverts = "Tickets ouverts :\n" + "\n".join([f"N° ID : {ticket['id']} - Auteur : {chercher_pseudo_auteur(ctx.guild, ticket['auteur_id'])} - Sujet : {ticket['sujet']} - Canal : {chercher_canal_ticket(ctx.guild, ticket['canal_id'])}" for ticket in tickets_ouverts]) if tickets_ouverts else "Aucun ticket ouvert actuellement."
-        message_fermes = "Tickets fermés :\n" + "\n".join([f"N° ID : {ticket['id']} - Auteur : {chercher_pseudo_auteur(ctx.guild, ticket['auteur_id'])} - Sujet : {ticket['sujet']}" for ticket in tickets_fermes]) if tickets_fermes else "Aucun ticket fermé."
+        messages_ouverts = "Tickets ouverts :\n" + "\n".join([f"N° ID : {ticket['id']} - Auteur : {await chercher_pseudo_auteur(ctx.guild, ticket['auteur_id'])} - Sujet : {ticket['sujet']} - Canal : {chercher_canal_ticket(ctx.guild, ticket['canal_id'])}" for ticket in tickets_ouverts]) if tickets_ouverts else "Aucun ticket ouvert actuellement."
+        messages_fermes = "Tickets fermés :\n" + "\n".join([f"N° ID : {ticket['id']} - Auteur : {await chercher_pseudo_auteur(ctx.guild, ticket['auteur_id'])} - Sujet : {ticket['sujet']}" for ticket in tickets_fermes]) if tickets_fermes else "Aucun ticket fermé."
 
-        await ctx.send(f"{message_ouverts}\n\n{message_fermes}")
+        await ctx.send(f"{messages_ouverts}\n\n{messages_fermes}")
     else:
         if ctx.author.id in [ticket['auteur_id'] for ticket in tickets_data['tickets']]:
             ticket_id = next(ticket['id'] for ticket in tickets_data['tickets'] if ticket['auteur_id'] == ctx.author.id)
-            await ctx.send(f"Vous avez un ticket ouvert avec l'ID : {ticket_id}.")
+            await ctx.send(f"Vous avez un ticket ouvert avec le n°{ticket_id}.")
         else:
             await ctx.send("Vous n'avez actuellement aucun ticket ouvert.")
 
