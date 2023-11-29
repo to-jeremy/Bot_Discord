@@ -1,14 +1,16 @@
 import discord
 import logging
+import json
 from discord.ext import commands
 from discord.ext.commands import HelpCommand
-import json
-import os
+from datetime import datetime
 
 intents = discord.Intents.default()
 intents.messages = True
 intents.guilds = True
 intents.message_content = True
+
+# --- Partie HelpCommand ---
 
 class Commande_Aide(HelpCommand):
     def command_not_found(self, string):
@@ -37,6 +39,8 @@ async def on_ready():
     print(f'Connecté sur le bot : {bot.user.name} avec son n° identifiant : {bot.user.id}')
     print('------')
 
+# --- Partie Commandes Disponibles ---
+
 @bot.command(name='commandes')
 async def afficher_commandes(ctx):
     # Tri des commandes par nom
@@ -44,11 +48,14 @@ async def afficher_commandes(ctx):
     commands_str = ', '.join(command_list)
     await ctx.send(f'Commandes disponibles : {commands_str}')
 
+# --- Partie Erreurs Commandes ---
+
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send(f"Commande non valide. Utilisez `{ctx.prefix}afficher_commandes` pour voir les commandes disponibles.")
 
+# --- Partie Présentation du bot ---
 
 @bot.command(name='presentation')
 async def presentation(ctx):
@@ -61,7 +68,7 @@ async def presentation(ctx):
 
     embed.add_field(
         name="Fonctionnalités principales",
-        value="1. Annonces\n2. Tickets\n3. Manuel de commandes",
+        value="1. Annonces\n2. Tickets\n3. Manuel de commandes\n4. Présentation nouveautés et mises à jours",
         inline=False
     )
 
@@ -76,16 +83,16 @@ async def presentation(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command(name='nouveautes')
-async def nouveautes(ctx):
-    embed = discord.Embed(
-        title="Changements effectuées",
-        description="Découvrez les dernières nouveautés et mises à jour de notre bot !\n",
-        color=0x3498db  # Couleur bleue
-    )
+# --- Partie Présentations changements sur le bot ---
+
+# Définition de la fonction pour mettre à jour les informations
+def mettre_a_jour_nouveautes(embed, version_data):
+    version = version_data.get("version", "")
+    nouveautes = version_data.get("nouveautes", [])
+    mises_a_jour = version_data.get("mises_a_jour", [])
 
     embed.add_field(
-        name="V1 (28/11/2023)",
+        name=f"V{version}",
         value="",
         inline=False
     )
@@ -93,35 +100,102 @@ async def nouveautes(ctx):
     # Section Nouveautés
     embed.add_field(
         name="Nouveautés",
-        value="1. Suppressions des annonces publiées\n"
-              "2. Présentations : Bot, Nouveautés et Mises à Jour",
+        value="\n".join(nouveautes),
         inline=False
     )
 
     # Section Mises à Jour
     embed.add_field(
         name="Mises à Jour",
-        value="1. Commandes : Rectification des droits d'utilisateurs pour les commandes\n"
-              "2. Manuel : Ajout de nouveaux commandes",
+        value="\n".join(mises_a_jour),
         inline=False
     )
 
     embed.set_footer(text="Merci beaucoup !")
 
+# Définition de la commande nouveautes
+@bot.command(name='nouveautes')
+async def fct_nouveautes(ctx):
+    embed = discord.Embed(
+        title="Changements effectuées",
+        description="Découvrez les dernières nouveautés et mises à jour de notre bot !\n",
+        color=0x3498db  # Couleur bleue
+    )
+
+    # Charger les informations depuis un fichier JSON
+    try:
+        with open('nouveautes_data.json', 'r') as file:
+            data = json.load(file)
+            versions = data.get("versions", [])
+            if versions:
+                # Afficher uniquement la dernière version
+                derniere_version = versions[-1]
+                mettre_a_jour_nouveautes(embed, derniere_version)
+    except FileNotFoundError:
+        print("Le fichier 'nouveautes_data.json' n'a pas été trouvé.")
+        return
+    except json.JSONDecodeError as e:
+        print(f"Erreur lors du décodage JSON : {e}")
+        return
+
     await ctx.send(embed=embed)
+
+# Sauvegarde des données dans un fichier
+nouveautes = [
+    "Changements de méthode pour le stockage des données \n--> Création d'un fichier JSON",
+]
+
+mises_a_jour = [
+    "Modifications pour la prise en compte des nouvelles informations de la version actuelle",
+]
+
+donnees = {
+    'version': '1.1.1 (29/11/2023)',
+    'nouveautes': nouveautes,
+    'mises_a_jour': mises_a_jour
+}
+
+# Charger les anciennes données depuis le fichier JSON
+try:
+    with open('nouveautes_data.json', 'r') as file:
+        anciennes_donnees = json.load(file)
+except FileNotFoundError:
+    # Si le fichier n'existe pas, initialisez les données comme un dictionnaire vide ou une structure appropriée
+    anciennes_donnees = {'versions': []}
+
+# Vérifier si la version actuelle est déjà présente dans les données
+version_actuelle = donnees['version']
+versions_existantes = [v.get('version') for v in anciennes_donnees['versions']]
+
+if version_actuelle in versions_existantes:
+    # Mettre à jour les informations pour la version actuelle
+    for version_data in anciennes_donnees['versions']:
+        if version_data.get('version') == version_actuelle:
+            version_data.update(donnees)
+
+    # Sauvegarder les données mises à jour dans le fichier JSON
+    with open('nouveautes_data.json', 'w') as file:
+        json.dump(anciennes_donnees, file, indent=4)
+else:
+    # Ajouter les nouvelles données aux anciennes données
+    anciennes_donnees['versions'].append(donnees)
+
+    # Sauvegarder les données mises à jour dans le fichier JSON
+    with open('nouveautes_data.json', 'w') as file:
+        json.dump(anciennes_donnees, file, indent=4)
 
 
 # --- Partie Annonces ---
 
 def chargements_annonces():
     try:
-        with open('annonces.json', 'r') as file:
+        with open('annonces_data.json', 'r') as file:
             return json.load(file)
     except FileNotFoundError:
         return {"annonces": {}, "annonce_id_counter": 1}
 
 def sauvegarder_annonces(annonces_data):
-    with open('annonces.json', 'w') as file:
+    with open('annonces_data.json', 'w') as file:
         json.dump(annonces_data, file, indent=2)
 
 @bot.command(name='ajouter_annonce')
@@ -288,16 +362,83 @@ async def afficher_annonces(ctx):
 
 # --- Partie Tickets ---
 
-tickets_ouverts = {}
+# Charger les données des tickets depuis un fichier JSON
+def charger_tickets():
+    try:
+        with open('tickets_data.json', 'r') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return {'tickets': []}
+
+# Sauvegarder les données des tickets dans un fichier JSON
+def sauvegarder_tickets(data):
+    with open('tickets_data.json', 'w') as file:
+        json.dump(data, file, indent=4)
+
+# Fonction pour ouvrir un nouveau ticket
+def ouvrir_nouveau_ticket(data, auteur_id, auteur_nom, sujet, canal_id):
+    ticket_id = len(data['tickets']) + 1
+    nouveau_ticket = {
+        'id': ticket_id,
+        'canal_id': canal_id,
+        'auteur_id': auteur_id,
+        'auteur_nom': auteur_nom,
+        'sujet': sujet,
+        'heure_creation': str(datetime.now()),
+        'heure_fermeture': None,
+        'statut': 'ouvert'
+    }
+    data['tickets'].append(nouveau_ticket)
+    sauvegarder_tickets(data)
+    return ticket_id
+
+# Fonction pour fermer un ticket
+def fermer_ticket(data, ticket_id):
+    for ticket in data['tickets']:
+        if ticket['id'] == ticket_id and ticket['statut'] == 'ouvert':
+            ticket['statut'] = 'fermer'
+            ticket['heure_fermeture'] = str(datetime.now())
+            sauvegarder_tickets(data)
+            return ticket  # Ticket fermé avec succès
+    return None  # Ticket non trouvé ou déjà fermé
+
+# Fonction pour afficher la liste des tickets
+def afficher_liste_tickets(data):
+    tickets_ouverts = [ticket for ticket in data['tickets'] if ticket['statut'] == 'ouvert']
+    tickets_fermes = [ticket for ticket in data['tickets'] if ticket['statut'] == 'fermer']
+    return tickets_ouverts, tickets_fermes
+
+async def chercher_pseudo_auteur(guild, auteur_id):
+    try:
+        # Charger les données des tickets depuis le fichier JSON
+        tickets_data = charger_tickets()
+
+        # Chercher l'auteur dans les données des tickets
+        for ticket in tickets_data['tickets']:
+            if ticket['auteur_id'] == auteur_id:
+                return ticket['auteur_nom']
+
+        # Si l'auteur n'est pas trouvé, renvoyer un message approprié
+        return f"Membre introuvable (n° ID : {auteur_id})"
+    except discord.NotFound:
+        return f"Membre introuvable (n° ID : {auteur_id})"
+
+
+def chercher_canal_ticket(guild, canal_id):
+    for canal in guild.channels:
+        if isinstance(canal, discord.TextChannel) and canal.id == canal_id:
+            return canal.mention
+    return "Canal non trouvé"
 
 @bot.command(name='ouvrir_ticket')
 async def ouvrir_ticket(ctx, *, sujet=None):
-    # Vérifie si l'utilisateur a déjà un ticket ouvert
-    if ctx.author.id in tickets_ouverts:
+    # Charger les données des tickets
+    tickets_data = charger_tickets()
+
+    if ctx.author.id in [ticket['auteur_id'] for ticket in tickets_data['tickets'] if ticket['statut'] == 'ouvert']:
         await ctx.send("Vous avez déjà un ticket ouvert. Veuillez fermer le ticket existant avant d'en ouvrir un nouveau.")
         return
     
-    # Validation du sujet (vous pouvez personnaliser cette vérification)
     if sujet is None:
         await ctx.send("Veuillez fournir un sujet pour le ticket.")
         return
@@ -319,8 +460,8 @@ async def ouvrir_ticket(ctx, *, sujet=None):
         await ctx.send("Une erreur s'est produite lors de la création du ticket. Veuillez réessayer plus tard.")
         return
 
-    # Stocker le canal du ticket dans le dictionnaire
-    tickets_ouverts[ctx.author.id] = (ticket_channel.id, sujet)
+    # Mettre à jour les données des tickets
+    ticket_id = ouvrir_nouveau_ticket(tickets_data, ctx.author.id, ctx.author.name, sujet, ticket_channel.id)
 
     # Envoyer un message d'accueil dans le canal du ticket
     try:
@@ -332,76 +473,56 @@ async def ouvrir_ticket(ctx, *, sujet=None):
         return
 
     # Informer l'utilisateur que le ticket a été créé
-    await ctx.send(f"Votre ticket a été ouvert avec succès ! Vous pouvez le trouver dans {ticket_channel.mention}.")
-    print("Information du canal créé pour l'utilisateur faite")
-
+    await ctx.send(f"Votre ticket a été ouvert avec succès ! Vous pouvez le trouver dans {ticket_channel.mention} avec le n°{ticket_id}.")
 
 @bot.command(name='fermer_ticket')
 @commands.has_permissions(administrator=True)
-async def fermer_ticket(ctx, ticket_id: int = None):
+async def fct_fermer_ticket(ctx, ticket_id: int = None):
+    # Charger les données des tickets
+    tickets_data = charger_tickets()
+
     if "Admin" in [role.name for role in ctx.author.roles]:
-        # Si aucun ticket_id n'est fourni
         if ticket_id is None:
-            await ctx.send("Veuillez spécifier l'ID du ticket que vous souhaitez fermer.")
+            await ctx.send("Veuillez spécifier le n° ID du ticket que vous souhaitez fermer.")
             return
 
-        # Appeler la fonction pour fermer un ticket spécifique
-        await fermer_ticket_specifique(ctx, ticket_id)
+        ticket_ferme = fermer_ticket(tickets_data, ticket_id)
+
+        if ticket_ferme:
+            # Récupérer le canal du ticket
+            ticket_channel = bot.get_channel(ticket_ferme['canal_id'])
+
+            # Supprimer le canal du ticket
+            if ticket_channel:
+                await ticket_channel.delete()
+
+            await ctx.send(f"Le ticket avec le n°{ticket_id} a été fermé avec succès, et le canal a été supprimé.")
+        else:
+            await ctx.send(f"Impossible de trouver le ticket avec le n°{ticket_id} ou il est déjà fermé.")
     else:
-        await ctx.send('Vous n\'avez pas les permissions nécessaires.')
-
-# Fonction pour fermer un ticket spécifique
-async def fermer_ticket_specifique(ctx, ticket_id: int):
-    # Vérifie si le ticket_id existe dans le dictionnaire
-    if ticket_id not in {v[0] for v in tickets_ouverts.values()}:
-        await ctx.send(f"Ticket avec l'ID n°{ticket_id} non trouvé.")
-        return
-
-    # Trouver l'utilisateur associé à ce ticket_id
-    user_id = None
-    sujet_ticket = None
-    for uid, (tid, sujet) in tickets_ouverts.items():
-        if tid == ticket_id:
-            user_id = uid
-            sujet_ticket = sujet
-            break
-
-    # Récupérer le canal du ticket
-    ticket_channel = bot.get_channel(ticket_id)
-
-    # Supprimer le canal du ticket
-    await ticket_channel.delete()
-
-    # Retirer l'utilisateur du dictionnaire des tickets ouverts
-    if user_id:
-        del tickets_ouverts[user_id]
-
-    # Informer l'administrateur que le ticket a été fermé avec le nom du sujet
-    await ctx.send(f"Le ticket avec l'ID n°{ticket_id} (Sujet : {sujet_ticket}) a été fermé avec succès.")
-
+        await ctx.send("Vous n'avez pas les permissions nécessaires.")
 
 @bot.command(name='tickets')
 async def voir_tickets(ctx):
-    # Vérifie si l'auteur de la commande est un administrateur
-    #if ctx.author.guild_permissions.administrator:
-    if "Admin" in [role.name for role in ctx.author.roles]:
-        # Affiche la liste des tickets ouverts avec leurs ID et le nom du sujet
-        tickets_info = [f"Ticket : {ticket_id} - Sujet : {ticket_sujet}" 
-                        for (ticket_id, ticket_sujet) in tickets_ouverts.values()]
-        message = "\n".join(tickets_info)
+    # Charger les données des tickets
+    tickets_data = charger_tickets()
 
-        if message:
-            await ctx.send(f"Tickets ouverts :\n ---------------- \n{message}")
-        else:
-            await ctx.send("Aucun ticket ouvert actuellement.")
+    if "Admin" in [role.name for role in ctx.author.roles]:
+        tickets_ouverts, tickets_fermes = afficher_liste_tickets(tickets_data)
+        
+        messages_ouverts = "Tickets ouverts :\n" + "\n".join([f"N° ID : {ticket['id']} - Auteur : {await chercher_pseudo_auteur(ctx.guild, ticket['auteur_id'])} - Sujet : {ticket['sujet']} - Canal : {chercher_canal_ticket(ctx.guild, ticket['canal_id'])}" for ticket in tickets_ouverts]) if tickets_ouverts else "Aucun ticket ouvert actuellement."
+        messages_fermes = "Tickets fermés :\n" + "\n".join([f"N° ID : {ticket['id']} - Auteur : {await chercher_pseudo_auteur(ctx.guild, ticket['auteur_id'])} - Sujet : {ticket['sujet']}" for ticket in tickets_fermes]) if tickets_fermes else "Aucun ticket fermé."
+
+        await ctx.send(f"{messages_ouverts}\n\n{messages_fermes}")
     else:
-        # Si l'auteur n'est pas administrateur, vérifie s'il a un ticket ouvert
-        if ctx.author.id in tickets_ouverts:
-            ticket_id, ticket_sujet = tickets_ouverts[ctx.author.id]
-            await ctx.send(f"Vous avez un ticket ouvert - Sujet : {ticket_sujet} - Numéro du ticket : {ticket_id}")
+        if ctx.author.id in [ticket['auteur_id'] for ticket in tickets_data['tickets']]:
+            ticket_id = next(ticket['id'] for ticket in tickets_data['tickets'] if ticket['auteur_id'] == ctx.author.id)
+            await ctx.send(f"Vous avez un ticket ouvert avec le n°{ticket_id}.")
         else:
             await ctx.send("Vous n'avez actuellement aucun ticket ouvert.")
 
+
+# --- Partie Configuration des logs ---
 
 # Configuration des journaux
 logging.basicConfig(filename='bot_logs.log', level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
@@ -432,20 +553,6 @@ async def get_logs(ctx):
             await ctx.send("Aucun log trouvé.")
     else:
         await ctx.send('Vous n\'avez pas les permissions nécessaires.')
-
-# # Exemple de log
-# @bot.command(name='ma_commande')
-# async def ma_commande(ctx):
-#     # Vérifier si l'utilisateur a la permission d'exécuter cette commande
-#     if not ctx.author.guild_permissions.administrator:
-#         await ctx.send("Vous n'avez pas la permission d'accéder aux logs.")
-#         return
-    
-#     # Exemple de log
-#     logging.info(f"L'utilisateur {ctx.author} a exécuté la commande !ma_commande.")
-    
-#     # Envoyer le log au canal Discord spécifié
-#     #await send_logs_to_channel(f"L'utilisateur {ctx.author} a exécuté la commande !ma_commande.")
 
 
 bot.run('MTE3ODM4NTExMTY2NjkzMzg5MQ.GCBXvS.c_onrPj3Ll9yhAauSJEN4TGY3QjDi5-gFtpc6g')
