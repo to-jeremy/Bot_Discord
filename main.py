@@ -61,7 +61,7 @@ async def presentation(ctx):
 
     embed.add_field(
         name="Fonctionnalités principales",
-        value="1. Annonces\n2. Tickets\n3. Manuel de commandes",
+        value="1. Annonces\n2. Tickets\n3. Manuel de commandes\n4. Présentation nouveautés et mises à jours",
         inline=False
     )
 
@@ -135,15 +135,15 @@ async def fct_nouveautes(ctx):
 
 # Sauvegarde des données dans un fichier
 nouveautes = [
-    "Changements de méthode pour le stockage des données \nCréation d'un fichier JSON",
+    "Changements de méthode pour le stockage des données \n--> Création d'un fichier JSON",
 ]
 
 mises_a_jour = [
-    "Pas de mises à jour importantes",
+    "Modifications pour la prise en compte des nouvelles informations de la version actuelle",
 ]
 
 donnees = {
-    'version': '1.1 (29/11/2023)',
+    'version': '1.1.1 (29/11/2023)',
     'nouveautes': nouveautes,
     'mises_a_jour': mises_a_jour
 }
@@ -160,7 +160,16 @@ except FileNotFoundError:
 version_actuelle = donnees['version']
 versions_existantes = [v.get('version') for v in anciennes_donnees['versions']]
 
-if version_actuelle not in versions_existantes:
+if version_actuelle in versions_existantes:
+    # Mettre à jour les informations pour la version actuelle
+    for version_data in anciennes_donnees['versions']:
+        if version_data.get('version') == version_actuelle:
+            version_data.update(donnees)
+
+    # Sauvegarder les données mises à jour dans le fichier JSON
+    with open('nouveautes_data.json', 'w') as file:
+        json.dump(anciennes_donnees, file, indent=4)
+else:
     # Ajouter les nouvelles données aux anciennes données
     anciennes_donnees['versions'].append(donnees)
 
