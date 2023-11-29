@@ -1,14 +1,20 @@
 import discord
 import logging
 import json
+import os
 from discord.ext import commands
 from discord.ext.commands import HelpCommand
 from datetime import datetime
+from dotenv import load_dotenv
 
 intents = discord.Intents.default()
 intents.messages = True
 intents.guilds = True
 intents.message_content = True
+
+load_dotenv()
+
+token = os.getenv("TOKEN")
 
 # --- Partie HelpCommand ---
 
@@ -555,4 +561,4 @@ async def get_logs(ctx):
         await ctx.send('Vous n\'avez pas les permissions nécessaires.')
 
 
-bot.run('MTE3ODM4NTExMTY2NjkzMzg5MQ.GCBXvS.c_onrPj3Ll9yhAauSJEN4TGY3QjDi5-gFtpc6g')
+bot.run(token)
