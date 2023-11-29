@@ -34,16 +34,9 @@ Entrainement à la création d'un bot discord en Python
 <strong>29/11/23</strong><br>
 <i>Version 1.1 :</i>
 
-<div id="bloc_page">
-			<textarea STYLE="border-style: none;" cols=80 rows=5>
-Du texte
-	exemple de texte avec tabulation
-	un autre
-Encore du texte
-			</textarea>
-		</div>
+<p STYLE="padding:0 0 0 40px;">Une ligne avec deux tabulations</p>
 
 - Changements de méthode pour le stockage des données<br>
     --> Création d'un fichier JSON<br>
-        &nbsp;&nbsp;- Annonces<br>
-        &nbsp;&nbsp;- Tickets (pas encore fait)
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Annonces<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Tickets (pas encore fait)
