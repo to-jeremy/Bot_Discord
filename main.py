@@ -2,6 +2,8 @@ import discord
 import logging
 from discord.ext import commands
 from discord.ext.commands import HelpCommand
+import json
+import os
 
 intents = discord.Intents.default()
 intents.messages = True
@@ -109,14 +111,41 @@ async def nouveautes(ctx):
     await ctx.send(embed=embed)
 
 
-annonces = {}  # Dictionnaire pour stocker les annonces avec leur ID comme clé
-annonce_id_counter = 1
+# --- Partie Annonces ---
+
+# Charger les annonces depuis le fichier
+def chargements_annonces():
+    if os.path.exists('annonces.json'):
+        with open('annonces.json', 'r', encoding='utf-8') as file:
+            return json.load(file)
+    else:
+        # Si le fichier n'existe pas, retournez une structure JSON vide
+        return {"annonces": {}}
+
+# Sauvegarder les annonces dans le fichier
+def sauvegardes_annonces(annonces):
+    with open('annonces.json', 'w', encoding='utf-8') as file:
+        json.dump(annonces, file, indent=4)
+
+def suppressions_annonces(annonce_id):
+    global annonces
+    charge_annonces = chargements_annonces()
+
+    if annonce_id in charge_annonces["annonces"]:
+        del charge_annonces["annonces"][annonce_id]
+        sauvegardes_annonces(charge_annonces["annonces"])
+        return True
+    else:
+        return False
+
+# Charger les annonces au démarrage du bot
+annonces = chargements_annonces()
 
 @bot.command(name='ajouter_annonce')
 async def ajouter_annonce(ctx, canal: str = None, *, message: str = None):
-    global annonce_id_counter
+    global annonces
     if isinstance(ctx.author, discord.Member):
-        #if "Admin" in [role.name for role in ctx.author.roles]:
+        if "Admin" in [role.name for role in ctx.author.roles]:
             # Vérifier si le nom ou l'ID du canal est spécifié
             if canal is None:
                 await ctx.send("Veuillez spécifier le nom ou l'ID du canal et le message que vous souhaitez annoncer.")
@@ -143,29 +172,34 @@ async def ajouter_annonce(ctx, canal: str = None, *, message: str = None):
                 await ctx.send("Veuillez spécifier le message que vous souhaitez annoncer.")
                 return
 
-            annonce_id = annonce_id_counter
-            annonce_id_counter += 1
+            annonce_id = len(annonces["annonces"]) + 1
 
             # Stockez l'annonce dans le dictionnaire
-            annonces[annonce_id] = {
+            annonces["annonces"][annonce_id] = {
                 "channel_id": found_channel.id,
                 "message": message,
                 "message_preview": message[:50]
             }
 
+            # Sauvegarder les annonces dans le fichier
+            sauvegardes_annonces(annonces["annonces"])
+
             # Envoyer le message dans le canal spécifié
             sent_message = await found_channel.send(f"{message}")
-            annonces[annonce_id]["message_id"] = sent_message.id  # Enregistrez l'ID du message
+            annonces["annonces"][annonce_id]["message_id"] = sent_message.id  # Enregistrez l'ID du message
 
             await ctx.send(f'L\'annonce n°{annonce_id} ajoutée avec succès sur le canal #{found_channel.name} !')
-        #else:
-        #    await ctx.send('Vous n\'avez pas les permissions nécessaires.')
+        else:
+            await ctx.send('Vous n\'avez pas les permissions nécessaires.')
     else:
         await ctx.send('Cette commande doit être exécutée sur un serveur, pas en message privé.')
+
 
 @bot.command(name='modifier_annonce')
 @commands.has_permissions(administrator=True)
 async def modifier_annonce(ctx, annonce_id: int = None, new_message: str = None):
+    global annonces
+    print("annonces 4", annonces)
     if isinstance(ctx.author, discord.Member):
         if "Admin" in [role.name for role in ctx.author.roles]:
             # Vérifier si l'ID de l'annonce est spécifié
@@ -177,7 +211,9 @@ async def modifier_annonce(ctx, annonce_id: int = None, new_message: str = None)
                 await ctx.send(f'Aucune annonce avec l\'ID {annonce_id} n\'a été trouvée.')
                 return
 
+            print("Annonces modif", annonces)
             annonce = annonces[annonce_id]
+            print("annonce modif", annonce)
 
             # Vérifier si le message est modifié
             if new_message is not None:
@@ -194,6 +230,10 @@ async def modifier_annonce(ctx, annonce_id: int = None, new_message: str = None)
                 sent_message = await bot.get_channel(annonce["channel_id"]).fetch_message(annonce["message_id"])
                 if sent_message:
                     await sent_message.edit(content=f"{new_message}")
+
+                    # Sauvegarder les annonces dans le fichier
+                    sauvegardes_annonces(annonces)
+
                     await ctx.send(f'L\'annonce n° {annonce_id} modifiée avec succès.')
                 else:
                     await ctx.send(f'Impossible de trouver le message d\'annonce avec l\'ID {annonce["message_id"]}.')
@@ -207,46 +247,37 @@ async def modifier_annonce(ctx, annonce_id: int = None, new_message: str = None)
 @bot.command(name='supprimer_annonce')
 @commands.has_permissions(administrator=True)
 async def supprimer_annonce(ctx, annonce_id: int = None):
+    global annonces
     if isinstance(ctx.author, discord.Member):
         if "Admin" in [role.name for role in ctx.author.roles]:
-            # Vérifier si l'ID de l'annonce est spécifié
             if annonce_id is None:
                 await ctx.send("Veuillez spécifier l'ID de l'annonce que vous souhaitez supprimer.")
                 return
+            
+            print("ici")
+            success = suppressions_annonces(annonce_id)
+            print("Test réussi ou pas :", success)
 
-            # Vérifier si l'annonce existe
-            if annonce_id not in annonces:
+            if success:
+                await ctx.send(f'L\'annonce n° {annonce_id} a été supprimée avec succès.')
+            else:
                 await ctx.send(f'Aucune annonce avec l\'ID {annonce_id} n\'a été trouvée.')
-                return
-
-            annonce = annonces[annonce_id]
-
-            # Supprimer l'annonce du dictionnaire
-            del annonces[annonce_id]
-
-            # Supprimer le message dans le canal existant
-            try:
-                sent_message = await bot.get_channel(annonce["channel_id"]).fetch_message(annonce["message_id"])
-                if sent_message:
-                    await sent_message.delete()
-                    await ctx.send(f'L\'annonce n° {annonce_id} a été supprimée avec succès.')
-                else:
-                    await ctx.send(f'Impossible de trouver le message d\'annonce avec l\'ID {annonce["message_id"]}.')
-            except discord.NotFound:
-                await ctx.send(f'Impossible de trouver le message d\'annonce avec l\'ID {annonce["message_id"]}.')
         else:
             await ctx.send('Vous n\'avez pas les permissions nécessaires.')
     else:
         await ctx.send('Cette commande doit être exécutée sur un serveur, pas en message privé.')
 
+
 @bot.command(name='annonces')
 @commands.has_permissions(administrator=True)
 async def afficher_annonces(ctx):
+    global annonces
     # Vérifier si l'utilisateur a le rôle d'administrateur
     if "Admin" in [role.name for role in ctx.author.roles]:
-        if annonces:
+        annonces_chargees = chargements_annonces()
+        if annonces_chargees and "annonces" in annonces_chargees:
             annonces_info = []
-            for annonce_id, annonce_data in annonces.items():
+            for annonce_id, annonce_data in annonces_chargees["annonces"].items():
                 channel_name = bot.get_channel(annonce_data["channel_id"]).name
                 message_id = annonce_data["message_id"]
                 message_preview = annonce_data["message_preview"]  # Afficher les 50 premiers caractères du message
@@ -259,6 +290,8 @@ async def afficher_annonces(ctx):
     else:
         await ctx.send('Vous n\'avez pas les permissions nécessaires.')
 
+
+# --- Partie Tickets ---
 
 tickets_ouverts = {}
 
