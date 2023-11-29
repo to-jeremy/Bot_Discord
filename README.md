@@ -36,5 +36,5 @@ Entrainement à la création d'un bot discord en Python
 
 - Changements de méthode pour le stockage des données<br>
     --> Création d'un fichier JSON<br>
-        - Annonces<br>
-        &nbsp;- Tickets (pas encore fait)
+        &nbsp;&nbsp;- Annonces<br>
+        &nbsp;&nbsp;- Tickets (pas encore fait)
