@@ -30,3 +30,11 @@ Entrainement à la création d'un bot discord en Python
 - Présentation du bot et nouveautés/mises à jour
 
 - Historique des actions du bot (en cours de développement)
+
+<strong>28/11/23</strong>
+<i>Version 1.1 :</i>
+
+- Changements de méthode pour le stockage des données<br>
+    --> Création d'un fichier JSON<br>
+        - Annonces
+        - Tickets (pas encore fait)
