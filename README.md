@@ -34,7 +34,13 @@ Entrainement à la création d'un bot discord en Python
 <strong>29/11/23</strong><br>
 <i>Version 1.1 :</i>
 
-<p STYLE="padding:0 0 0 40px;">Une ligne avec deux tabulations</p>
+<div id="bloc_page">
+			<p>Une ligne sans tabulation</p>
+			<p STYLE="padding:0 0 0 20px;">Une ligne avec une tabulation</p>
+			<p STYLE="padding:0 0 0 40px;">Une ligne avec deux tabulations</p>
+			<p STYLE="padding:0 0 0 20px;">Une ligne avec une première tabulation.<span STYLE="padding:0 0 0 20px;">Puis une seconde dans la même ligne</span></p>
+			<p>Une ligne sans tabulation</p>
+		</div>
 
 - Changements de méthode pour le stockage des données<br>
     --> Création d'un fichier JSON<br>
