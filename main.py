@@ -1,4 +1,3 @@
-# main.py
 import os
 import discord
 from discord.ext import commands
@@ -7,7 +6,7 @@ from src.commandes import Commande_Aide, afficher_commandes
 from src.presentation import presentation, fct_nouveautes
 from src.annonces import afficher_annonces, ajouter_annonce, modifier_annonce, supprimer_annonce
 from src.tickets import ouvrir_ticket, fct_fermer_ticket, voir_tickets
-#from src.logs import get_logs
+from src.logs import send_logs_to_channel, get_logs
 
 load_dotenv()
 
@@ -80,11 +79,26 @@ async def cmd_ouvrir_ticket(ctx, *, sujet=None):
 @bot.command(name='fermer_ticket')
 @commands.has_permissions(administrator=True)
 async def cmd_fermer_ticket(ctx, ticket_id: int = None):
-    await fct_fermer_ticket(ctx,ticket_id=ticket_id)
+    await fct_fermer_ticket(ctx,ticket_id = ticket_id)
 
 @bot.command(name='tickets')
 async def cmd_voir_tickets(ctx):
     await voir_tickets(ctx)
+
+
+# --- Partie Configuration des logs ---
+
+@bot.command(name='logs')
+@commands.has_permissions(administrator=True)
+async def cmd_get_logs(ctx):
+    logs_content = get_logs()
+    print("contenu des logs", logs_content)
+    
+    # Envoyer le contenu des logs dans le canal Discord
+    print("ici")
+    await ctx.send(f"```\n{logs_content}\n```")
+    print("contenu des logs 1", logs_content)
+
 
 if __name__ == "__main__":
     bot.run(token)

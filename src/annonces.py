@@ -5,7 +5,7 @@ import os
 # Obtenez le chemin vers le dossier actuel du script
 dossier_script = os.path.dirname(os.path.abspath(__file__))
 
-# Construisez le chemin vers nouveautes_data.json dans src/data
+# Construisez le chemin vers annonces_data.json dans src/data
 chemin_fichier_json = os.path.join(dossier_script, 'data', 'annonces_data.json')
 
 # --- Partie Annonces ---
