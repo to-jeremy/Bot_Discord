@@ -47,4 +47,5 @@ Entrainement à la création d'un bot discord en Python
 
 - Changements de structures des codes<br>
     --> Créations de fichiers pour chaque fonctionnalité du bot
-   
+
+- Ajout d'un fichier .gitignore
