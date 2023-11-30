@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from src.commandes import Commande_Aide, afficher_commandes
 from src.presentation import presentation, fct_nouveautes
 from src.annonces import afficher_annonces, ajouter_annonce, modifier_annonce, supprimer_annonce
-#from src.tickets import ouvrir_ticket, fct_fermer_ticket, voir_tickets
+from src.tickets import ouvrir_ticket, fct_fermer_ticket, voir_tickets
 #from src.logs import get_logs
 
 load_dotenv()
@@ -69,6 +69,22 @@ async def cmd_supprimer_annonce(ctx, annonce_id: int = None):
 async def cmd_afficher_annonces(ctx):
     await afficher_annonces(ctx)
 
+
+# --- Partie Tickets ---
+
+@bot.command(name='ouvrir_ticket')
+async def cmd_ouvrir_ticket(ctx, *, sujet=None):
+    await ouvrir_ticket(ctx, sujet=sujet)
+
+
+@bot.command(name='fermer_ticket')
+@commands.has_permissions(administrator=True)
+async def cmd_fermer_ticket(ctx, ticket_id: int = None):
+    await fct_fermer_ticket(ctx,ticket_id=ticket_id)
+
+@bot.command(name='tickets')
+async def cmd_voir_tickets(ctx):
+    await voir_tickets(ctx)
 
 if __name__ == "__main__":
     bot.run(token)
