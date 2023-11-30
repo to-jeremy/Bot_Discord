@@ -2,4 +2,7 @@ annonces_data.json
 bot_logs.log
 nouveautes_data.json
 tickets_data.json
+main-copy.py
 .env
+__pycache__/
+src/__pycache__/
