@@ -93,15 +93,15 @@ async def fct_nouveautes(ctx):
 
 # Sauvegarde des données dans un fichier
 nouveautes = [
-    "Changements de méthode pour le stockage des données \n--> Création d'un fichier JSON",
+    "Changements de structures des codes \n--> Créations de fichiers pour chaque fonctionnalité du bot",
 ]
 
 mises_a_jour = [
-    "Modifications pour la prise en compte des nouvelles informations de la version actuelle",
+    "Sécurité de l'authentification du bot",
 ]
 
 donnees = {
-    'version': '1.1.1 (29/11/2023)',
+    'version': '1.2 (30/11/2023)',
     'nouveautes': nouveautes,
     'mises_a_jour': mises_a_jour
 }

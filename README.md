@@ -39,3 +39,12 @@ Entrainement à la création d'un bot discord en Python
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Annonces<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Informations nouveautés et mises à jours du bot<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Tickets<br>
+
+<strong>30/11/23</strong><br>
+<i>Version 1.2 :</i>
+
+- Sécurité de l'authentification du bot
+
+- Changements de structures des codes<br>
+    --> Créations de fichiers pour chaque fonctionnalité du bot
+   
