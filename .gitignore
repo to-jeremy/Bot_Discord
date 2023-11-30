@@ -3,3 +3,5 @@ bot_logs.log
 nouveautes_data.json
 tickets_data.json
 .env
+__pycache__/
+src/__pycache__/
