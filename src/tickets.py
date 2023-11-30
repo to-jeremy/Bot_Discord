@@ -138,7 +138,7 @@ async def fct_fermer_ticket(ctx, ticket_id: int = None):
 
         if ticket_ferme:
             # Récupérer le canal du ticket
-            ticket_channel = bot.get_channel(ticket_ferme['canal_id'])
+            ticket_channel = ctx.bot.get_channel(ticket_ferme['canal_id'])
 
             # Supprimer le canal du ticket
             if ticket_channel:
@@ -150,7 +150,7 @@ async def fct_fermer_ticket(ctx, ticket_id: int = None):
     else:
         await ctx.send("Vous n'avez pas les permissions nécessaires.")
 
-@bot.command(name='tickets')
+
 async def voir_tickets(ctx):
     # Charger les données des tickets
     tickets_data = charger_tickets()
