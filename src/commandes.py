@@ -1,6 +1,4 @@
-# commandes.py
 import discord
-from discord.ext import commands
 from discord.ext.commands import HelpCommand
 
 # --- Partie HelpCommand ---
