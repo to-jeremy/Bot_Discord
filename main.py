@@ -29,7 +29,7 @@ async def on_ready():
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
-        await ctx.send(f"Commande non valide. Utilisez `{ctx.prefix}afficher_commandes` pour voir les commandes disponibles.")
+        await ctx.send(f"Commande non valide. Utilisez `{ctx.prefix}commandes` pour voir les commandes disponibles.")
 
 # --- Partie Commandes Disponibles ---
 
