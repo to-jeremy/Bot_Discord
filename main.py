@@ -1,12 +1,14 @@
 import os
+
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-from src.commandes import Commande_Aide, afficher_commandes
-from src.presentation import presentation, fct_nouveautes
+
 from src.annonces import afficher_annonces, ajouter_annonce, modifier_annonce, supprimer_annonce
+from src.commandes import Commande_Aide, afficher_commandes
+from src.logs import get_logs
+from src.presentation import presentation, fct_nouveautes
 from src.tickets import ouvrir_ticket, fct_fermer_ticket, voir_tickets
-from src.logs import send_logs_to_channel, get_logs
 
 load_dotenv()
 
