@@ -8,6 +8,8 @@ class Commande_Aide(HelpCommand):
         return f"Aucune commande nommée {string} n'a été trouvée."
 
     def get_command_signature(self, command):
+        if command.name == "help":
+            return f"{self.context.prefix}{command.qualified_name}"
         return f"{self.context.prefix}{command.qualified_name} {command.signature}"
 
     async def send_bot_help(self, mapping):
